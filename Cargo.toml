@@ -1,0 +1,11 @@
+[package]
+name = "ui"
+version = "0.1.0"
+authors = ["nanolsn <nanonicholson@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+gl = "0.14"
+glutin = "0.24"
+image = "0.23"
+glm = { package = "nalgebra-glm", version = "0.7" }
