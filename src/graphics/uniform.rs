@@ -1,3 +1,5 @@
+use super::shaders::ShaderProgram;
+
 pub trait Accept {
     fn accept(&self, location: i32);
 }
@@ -14,6 +16,7 @@ pub struct Uniform<T>
 {
     value: T,
     location: i32,
+    pub(super) shader: u32,
     accepted: std::cell::Cell<bool>,
 }
 
@@ -21,7 +24,7 @@ impl<T> Uniform<T>
     where
         T: Accept,
 {
-    pub fn new(value: T, location: i32) -> Result<Self, UniformError> {
+    pub fn new(value: T, location: i32, shader: &ShaderProgram) -> Result<Self, UniformError> {
         if location < 0 {
             return Err(UniformError::IncorrectLocation);
         }
@@ -29,6 +32,7 @@ impl<T> Uniform<T>
         Ok(Uniform {
             value,
             location,
+            shader: shader.id,
             accepted: std::cell::Cell::new(false),
         })
     }
@@ -164,6 +168,8 @@ impl Accept for bool {
 
 impl Accept for crate::common::color::Color {
     fn accept(&self, location: i32) {
-        unsafe { gl::Uniform4f(location, self.0, self.1, self.2, self.3) }
+        unsafe {
+            gl::Uniform4f(location, self.0, self.1, self.2, self.3);
+        }
     }
 }

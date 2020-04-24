@@ -90,7 +90,7 @@ impl ShaderProgram {
     ///
     /// This function is unsafe, because a `ShaderProgram` needs to be properly deleted,
     /// but `ShaderProgram` doesn't implement `Drop`.
-    pub(super) unsafe fn new(vs_code: &CStr, fs_code: &CStr) -> Result<ShaderProgram, ShaderError> {
+    unsafe fn new(vs_code: &CStr, fs_code: &CStr) -> Result<ShaderProgram, ShaderError> {
         let vertex_shader = Shader::new_vertex_shader(vs_code)?;
         let fragment_shader = Shader::new_fragment_shader(fs_code)?;
 
@@ -130,17 +130,6 @@ impl ShaderProgram {
             Ok(())
         }
     }
-
-    pub fn get_uniform<T>(&self, name: T) -> i32
-        where
-            T: AsRef<CStr>,
-    { unsafe { gl::GetUniformLocation(self.id, name.as_ref().as_ptr()) } }
-
-    pub fn make_uniform<T, S>(&self, value: T, name: S) -> Result<Uniform<T>, UniformError>
-        where
-            T: Accept,
-            S: AsRef<CStr>
-    { Uniform::new(value, self.get_uniform(name)) }
 }
 
 #[derive(Debug)]
@@ -164,6 +153,16 @@ impl ShaderSet {
         Ok(())
     }
 
+    pub fn len(&self) -> usize { self.shaders.len() }
+
+    pub fn active(&self) -> Option<&ShaderProgram> {
+        if let Some(idx) = self.used {
+            Some(&self.shaders[idx])
+        } else {
+            None
+        }
+    }
+
     pub fn use_shader(&mut self, idx: usize) {
         match self.used {
             Some(i) if i == idx => return,
@@ -178,6 +177,39 @@ impl ShaderSet {
         if self.used.is_some() {
             unsafe { gl::UseProgram(0) };
             self.used = None;
+        }
+    }
+
+    pub fn accept<T>(&self, uniform: &Uniform<T>)
+        where
+            T: Accept,
+    {
+        match self.active() {
+            Some(shader) if shader.id == uniform.shader => uniform.accept(),
+            _ => panic!("Shader {} is not used!", uniform.shader),
+        }
+    }
+
+    pub fn get_uniform<T>(&self, name: T) -> i32
+        where
+            T: AsRef<CStr>,
+    {
+        if let Some(shader) = self.active() {
+            unsafe { gl::GetUniformLocation(shader.id, name.as_ref().as_ptr()) }
+        } else {
+            panic!("Shader is not used!")
+        }
+    }
+
+    pub fn make_uniform<T, S>(&self, value: T, name: S) -> Result<Uniform<T>, UniformError>
+        where
+            T: Accept,
+            S: AsRef<CStr>
+    {
+        if let Some(shader) = self.active() {
+            Uniform::new(value, self.get_uniform(name), shader)
+        } else {
+            panic!("Shader is not used!")
         }
     }
 }

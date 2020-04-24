@@ -1,7 +1,7 @@
 use super::{
     super::common::{color::Color, rect::Rect},
     window::Window,
-    shaders::{ShaderSet, ShaderProgram},
+    shaders::ShaderSet,
     rect_render::RectRender,
     draw::Draw,
 };
@@ -17,18 +17,20 @@ impl Render {
     pub fn new(context: &glutin::WindowedContext<glutin::PossiblyCurrent>) -> Self {
         gl::load_with(|ptr| context.get_proc_address(ptr) as *const _);
 
-        let mut shaders = ShaderSet::new();
-
-        shaders.add(
-            c_str!(include_str!("../shaders/vs.glsl")),
-            c_str!(include_str!("../shaders/fs.glsl")),
-        ).unwrap();
-
-        shaders.use_shader(0);
-        Render::set_defaults(&shaders[0]);
-
         Render {
-            shaders,
+            shaders: {
+                let mut shaders = ShaderSet::new();
+
+                shaders.add(
+                    c_str!(include_str!("../shaders/vs.glsl")),
+                    c_str!(include_str!("../shaders/fs.glsl")),
+                ).unwrap();
+
+                shaders.use_shader(0);
+                Render::set_defaults(&shaders);
+
+                shaders
+            },
 
             size: context
                 .window()
@@ -40,13 +42,13 @@ impl Render {
         }
     }
 
-    fn set_defaults(shader_program: &ShaderProgram) {
-        shader_program
+    fn set_defaults(shader: &ShaderSet) {
+        shader
             .make_uniform(Color::white(), c_str!("col"))
             .unwrap()
             .accept();
 
-        shader_program
+        shader
             .make_uniform(false, c_str!("draw_texture"))
             .unwrap()
             .accept();
