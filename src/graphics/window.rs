@@ -36,7 +36,7 @@ impl Window {
 
         let render = Render::new(&context);
 
-        let root = Root::new(Color::rgb(80, 120, 230));
+        let root = Root::new(Color::rgb(0.4, 0.2, 0.8));
 
         Window {
             context,
