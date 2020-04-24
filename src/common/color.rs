@@ -1,6 +1,7 @@
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Color(pub f32, pub f32, pub f32, pub f32);
 
+#[allow(dead_code)]
 impl Color {
     pub fn black() -> Self { Color(0.0, 0.0, 0.0, 1.0) }
 

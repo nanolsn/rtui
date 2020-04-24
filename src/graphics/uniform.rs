@@ -1,4 +1,4 @@
-use super::shaders::ShaderProgram;
+use super::shaders::{ShaderProgram, ShaderSet};
 
 pub trait Accept {
     fn accept(&self, location: i32);
@@ -32,7 +32,7 @@ impl<T> Uniform<T>
         Ok(Uniform {
             value,
             location,
-            shader: shader.id,
+            shader: shader.id(),
             accepted: std::cell::Cell::new(false),
         })
     }
@@ -52,11 +52,15 @@ impl<T> Uniform<T>
         self.accepted.set(false);
     }
 
-    pub fn accept(&self) {
+    pub fn accept(&self, shader: &ShaderSet) {
         if !self.accepted.get() {
-            self.value.accept(self.location);
-
-            self.accepted.set(true);
+            match shader.active() {
+                Some(shader) if shader.id() == self.shader => {
+                    self.value.accept(self.location);
+                    self.accepted.set(true);
+                }
+                _ => panic!("Shader {} is not used!", self.shader),
+            }
         }
     }
 }

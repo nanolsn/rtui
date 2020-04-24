@@ -6,15 +6,9 @@ use common::rect::Rect;
 use graphics::window::Window;
 
 fn main() {
-    let rect = Rect::new((0, 0), (20, 40));
-    println!("{:?}", rect);
+    let rect = Rect::new((20, 40), (80, 40));
 
-    assert!(rect.intersects_point((0, 0)));
-    assert!(rect.intersects_point((10, 30)));
-    assert!(!rect.intersects_point((20, 15)));
-
-    let window = Window::new("App", (300, 400));
-    window.run(move |render| {
+    Window::new("App", (600, 400)).run(move |render| {
         render.draw(&rect);
     });
 }

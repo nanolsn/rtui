@@ -36,7 +36,7 @@ impl Window {
 
         let render = Render::new(&context);
 
-        let root = Root::new(Color::rgb(0.4, 0.2, 0.8));
+        let root = Root::new(Color::default());
 
         Window {
             context,
@@ -46,7 +46,10 @@ impl Window {
         }
     }
 
-    pub fn run<F>(mut self, mut f: F)
+    #[allow(dead_code)]
+    pub fn set_bg(&mut self, color: Color) { self.root.bg = color }
+
+    pub fn run<F>(self, mut f: F)
         where
             F: FnMut(&Render) + 'static,
     {

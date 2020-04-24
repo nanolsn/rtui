@@ -82,7 +82,7 @@ impl Drop for Shader {
 
 #[derive(Debug)]
 pub struct ShaderProgram {
-    pub(super) id: u32,
+    id: u32,
 }
 
 impl ShaderProgram {
@@ -94,13 +94,11 @@ impl ShaderProgram {
         let vertex_shader = Shader::new_vertex_shader(vs_code)?;
         let fragment_shader = Shader::new_fragment_shader(fs_code)?;
 
-        let shader_program_id = unsafe { gl::CreateProgram() };
+        let shader_program_id = gl::CreateProgram();
 
-        unsafe {
-            gl::AttachShader(shader_program_id, vertex_shader.id);
-            gl::AttachShader(shader_program_id, fragment_shader.id);
-            gl::LinkProgram(shader_program_id);
-        }
+        gl::AttachShader(shader_program_id, vertex_shader.id);
+        gl::AttachShader(shader_program_id, fragment_shader.id);
+        gl::LinkProgram(shader_program_id);
 
         let shader_program = ShaderProgram { id: shader_program_id };
         shader_program.check_link_error()?;
@@ -130,6 +128,8 @@ impl ShaderProgram {
             Ok(())
         }
     }
+
+    pub fn id(&self) -> u32 { self.id }
 }
 
 #[derive(Debug)]
@@ -153,6 +153,7 @@ impl ShaderSet {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub fn len(&self) -> usize { self.shaders.len() }
 
     pub fn active(&self) -> Option<&ShaderProgram> {
@@ -183,12 +184,7 @@ impl ShaderSet {
     pub fn accept<T>(&self, uniform: &Uniform<T>)
         where
             T: Accept,
-    {
-        match self.active() {
-            Some(shader) if shader.id == uniform.shader => uniform.accept(),
-            _ => panic!("Shader {} is not used!", uniform.shader),
-        }
-    }
+    { uniform.accept(self) }
 
     pub fn get_uniform<T>(&self, name: T) -> i32
         where

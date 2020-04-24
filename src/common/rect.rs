@@ -1,5 +1,3 @@
-use std::ops::{Mul, Div};
-
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct Rect {
     pub x: u32,
@@ -8,6 +6,7 @@ pub struct Rect {
     pub height: u32,
 }
 
+#[allow(dead_code)]
 impl Rect {
     pub fn new((x, y): (u32, u32), (width, height): (u32, u32)) -> Self {
         Rect { x, y, width, height }
