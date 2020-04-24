@@ -19,6 +19,7 @@ impl From<std::io::Error> for ShaderError {
     fn from(e: std::io::Error) -> Self { ShaderError::IOError(e) }
 }
 
+#[derive(Debug)]
 pub struct Shader {
     id: u32,
 }
@@ -79,6 +80,7 @@ impl Drop for Shader {
     fn drop(&mut self) { unsafe { gl::DeleteShader(self.id) } }
 }
 
+#[derive(Debug)]
 pub struct ShaderProgram {
     id: u32,
 }

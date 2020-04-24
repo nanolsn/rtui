@@ -1,12 +1,15 @@
 use super::{
-    super::common::color::Color,
+    super::common::{color::Color, rect::Rect},
     window::Window,
     shaders::ShaderProgram,
+    rect_render::RectRender,
 };
 
+#[derive(Debug)]
 pub struct Render {
     shader_program: ShaderProgram,
     size: (u32, u32),
+    rect_render: RectRender,
 }
 
 impl Render {
@@ -24,6 +27,8 @@ impl Render {
                 .inner_size()
                 .to_logical::<u32>(context.window().scale_factor())
                 .into(),
+
+            rect_render: RectRender::new(0, 1),
         }
     }
 
@@ -41,4 +46,6 @@ impl Render {
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
     }
+
+    pub fn draw_rect(&self, rect: &Rect) { self.rect_render.draw(rect) }
 }
