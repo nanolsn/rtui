@@ -1,9 +1,9 @@
 use super::{
-    super::common::{color::Color, rect::Rect},
+    super::common::{Color, Rect},
     shaders::ShaderSet,
     rect_render::RectRender,
     uniform::Uniform,
-    draw::Draw,
+    Draw,
 };
 
 #[derive(Debug)]

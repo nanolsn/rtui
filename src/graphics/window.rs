@@ -1,6 +1,6 @@
 use super::render::Render;
 use crate::{
-    common::color::Color,
+    common::Color,
     ui::root::Root,
 };
 

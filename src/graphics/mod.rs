@@ -1,9 +1,13 @@
 #[macro_use]
-pub mod macros;
+mod macros;
 
-pub mod draw;
-pub mod rect_render;
-pub mod render;
-pub mod shaders;
-pub mod uniform;
-pub mod window;
+mod draw;
+mod rect_render;
+mod render;
+mod shaders;
+mod uniform;
+mod window;
+
+pub use draw::Draw;
+pub use render::Render;
+pub use window::Window;

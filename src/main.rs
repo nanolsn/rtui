@@ -2,8 +2,8 @@ mod common;
 mod graphics;
 mod ui;
 
-use common::rect::Rect;
-use graphics::window::Window;
+use common::Rect;
+use graphics::Window;
 
 fn main() {
     let rect = Rect::new((20, 40), (80, 40));

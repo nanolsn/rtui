@@ -1,9 +1,9 @@
-use super::render::Render;
+use super::Render;
 
 pub trait Draw {
     fn draw(&self, render: &Render);
 }
 
-impl Draw for crate::common::rect::Rect {
+impl Draw for crate::common::Rect {
     fn draw(&self, render: &Render) { render.draw_rect(self) }
 }

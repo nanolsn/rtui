@@ -1,4 +1,7 @@
-use super::shaders::{ShaderProgram, ShaderSet};
+use super::shaders::{
+    ShaderProgram,
+    ShaderSet,
+};
 
 pub trait Accept {
     fn accept(&self, location: i32);
@@ -170,7 +173,7 @@ impl Accept for bool {
     }
 }
 
-impl Accept for crate::common::color::Color {
+impl Accept for crate::common::Color {
     fn accept(&self, location: i32) {
         unsafe {
             gl::Uniform4f(location, self.0, self.1, self.2, self.3);

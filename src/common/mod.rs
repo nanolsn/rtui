@@ -1,2 +1,5 @@
-pub mod color;
-pub mod rect;
+mod color;
+mod rect;
+
+pub use color::Color;
+pub use rect::Rect;

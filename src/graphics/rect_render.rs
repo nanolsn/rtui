@@ -1,4 +1,4 @@
-use crate::common::rect::Rect;
+use crate::common::Rect;
 
 #[derive(Debug)]
 pub(super) struct RectRender {
