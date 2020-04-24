@@ -1,8 +1,7 @@
 use super::{
     super::common::{color::Color, rect::Rect},
     window::Window,
-    shaders::ShaderProgram,
-    shader_set::ShaderSet,
+    shaders::{ShaderSet, ShaderProgram},
     rect_render::RectRender,
     draw::Draw,
 };
