@@ -1,30 +1,30 @@
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct Rect {
-    pub x: u32,
-    pub y: u32,
+    pub x: i32,
+    pub y: i32,
     pub width: u32,
     pub height: u32,
 }
 
 #[allow(dead_code)]
 impl Rect {
-    pub fn new((x, y): (u32, u32), (width, height): (u32, u32)) -> Self {
+    pub fn new((x, y): (i32, i32), (width, height): (u32, u32)) -> Self {
         Rect { x, y, width, height }
     }
 
-    pub fn pos(&self) -> (u32, u32) { (self.x, self.y) }
+    pub fn pos(&self) -> (i32, i32) { (self.x, self.y) }
 
     pub fn size(&self) -> (u32, u32) { (self.width, self.height) }
 
-    pub fn left(&self) -> u32 { self.x }
+    pub fn left(&self) -> i32 { self.x }
 
-    pub fn right(&self) -> u32 { self.x + self.width }
+    pub fn right(&self) -> i32 { self.x + self.width as i32 }
 
-    pub fn bot(&self) -> u32 { self.y }
+    pub fn bot(&self) -> i32 { self.y }
 
-    pub fn top(&self) -> u32 { self.y + self.height }
+    pub fn top(&self) -> i32 { self.y + self.height as i32 }
 
-    pub fn intersects_point(&self, (a, b): (u32, u32)) -> bool {
+    pub fn intersects_point(&self, (a, b): (i32, i32)) -> bool {
         self.left() <= a && a < self.right()
             && self.bot() <= b && b < self.top()
     }

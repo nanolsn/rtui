@@ -3,6 +3,7 @@ use super::{
     shaders::ShaderSet,
     rect_render::RectRender,
     uniform::Uniform,
+    texture::Texture,
     Draw,
 };
 
@@ -12,6 +13,8 @@ pub struct Render {
     size: (u32, u32),
     rect_render: RectRender,
     projection: Uniform<glm::Mat4>,
+    texture0: Uniform<i32>,
+    draw_texture: Uniform<bool>,
 }
 
 impl Render {
@@ -26,7 +29,6 @@ impl Render {
         ).unwrap();
 
         shaders.use_shader(0);
-        Render::set_defaults(&shaders);
 
         let size: (u32, u32) = context
             .window()
@@ -42,26 +44,32 @@ impl Render {
 
         shaders.accept(&projection);
 
+        let texture0 = shaders
+            .make_uniform(0, c_str!("texture0"))
+            .unwrap();
+
+        shaders.accept(&texture0);
+
+        let col = shaders
+            .make_uniform(Color::white(), c_str!("col"))
+            .unwrap();
+
+        shaders.accept(&col);
+
+        let draw_texture = shaders
+            .make_uniform(false, c_str!("draw_texture"))
+            .unwrap();
+
+        shaders.accept(&draw_texture);
+
         Render {
             shaders,
             size,
             rect_render: RectRender::new(0, 1),
             projection,
+            texture0,
+            draw_texture,
         }
-    }
-
-    fn set_defaults(shader: &ShaderSet) {
-        let col = shader
-            .make_uniform(Color::white(), c_str!("col"))
-            .unwrap();
-
-        shader.accept(&col);
-
-        let draw_texture = shader
-            .make_uniform(false, c_str!("draw_texture"))
-            .unwrap();
-
-        shader.accept(&draw_texture);
     }
 
     #[allow(dead_code)]
@@ -87,8 +95,19 @@ impl Render {
 
     pub fn draw_rect(&self, rect: &Rect) { self.rect_render.draw(rect) }
 
-    pub fn draw<D>(&self, draw: &D)
+    pub fn draw<D>(&mut self, draw: &D)
         where
             D: Draw,
     { draw.draw(self) }
+
+    pub fn set_texture(&mut self, texture: &Texture) {
+        self.texture0.set_value(0);
+        self.shaders.accept(&self.texture0);
+        texture.bind(*self.texture0.as_ref() as u32);
+    }
+
+    pub fn draw_texture(&mut self, draw: bool) {
+        self.draw_texture.set_value(draw);
+        self.draw_texture.accept(&self.shaders);
+    }
 }

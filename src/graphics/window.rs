@@ -47,11 +47,14 @@ impl Window {
     }
 
     #[allow(dead_code)]
-    pub fn set_bg(&mut self, color: Color) { self.root.bg = color }
+    pub fn with_bg(&mut self, color: Color) -> &mut Self {
+        self.root.bg = color;
+        self
+    }
 
     pub fn run<F>(self, mut f: F)
         where
-            F: FnMut(&Render) + 'static,
+            F: FnMut(&mut Render) + 'static,
     {
         let mut render = self.render;
         let mut focused = true;
@@ -82,7 +85,7 @@ impl Window {
                     render.use_program();
                     render.clear(root.bg);
 
-                    f(&render);
+                    f(&mut render);
 
                     context.swap_buffers().unwrap();
                 }
