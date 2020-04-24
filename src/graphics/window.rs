@@ -46,7 +46,10 @@ impl Window {
         }
     }
 
-    pub fn run(mut self) {
+    pub fn run<F>(mut self, mut f: F)
+        where
+            F: FnMut(&Render) + 'static,
+    {
         let mut render = self.render;
         let mut focused = true;
         let context = self.context;
@@ -73,7 +76,10 @@ impl Window {
                 Event::NewEvents(StartCause::Poll) => {
                     if !focused { return; }
 
+                    render.use_program();
                     render.clear(root.bg);
+
+                    f(&render);
 
                     context.swap_buffers().unwrap();
                 }

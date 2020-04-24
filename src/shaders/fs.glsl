@@ -2,11 +2,16 @@
 
 uniform vec4 col;
 uniform sampler2D texture0;
+uniform bool draw_texture;
 
 in vec2 st_fs;
 
-out vec4 frag_col;
+out vec4 frag;
 
 void main() {
-    frag_col = texture(texture0, st_fs) * col;
+    if (draw_texture) {
+        frag = texture(texture0, st_fs) * col;
+    } else {
+        frag = col;
+    }
 }

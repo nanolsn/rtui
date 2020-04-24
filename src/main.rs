@@ -14,5 +14,7 @@ fn main() {
     assert!(!rect.intersects_point((20, 15)));
 
     let window = Window::new("App", (300, 400));
-    window.run();
+    window.run(move |render| {
+        render.draw(&rect);
+    });
 }

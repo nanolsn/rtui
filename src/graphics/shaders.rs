@@ -1,9 +1,12 @@
 use std::ffi::CStr;
 
-use super::uniform::{
-    Uniform,
-    Accept,
-    UniformError,
+use super::{
+    shader_set::ShaderSet,
+    uniform::{
+        Uniform,
+        Accept,
+        UniformError,
+    },
 };
 
 const INFO_LOG_SIZE: usize = 512;
@@ -52,7 +55,7 @@ impl Shader {
         Ok(shader)
     }
 
-    pub fn check_compile_error(&self) -> Result<(), ShaderError> {
+    fn check_compile_error(&self) -> Result<(), ShaderError> {
         let mut success = gl::FALSE as i32;
         let mut info_log = Vec::with_capacity(INFO_LOG_SIZE);
 
@@ -82,11 +85,15 @@ impl Drop for Shader {
 
 #[derive(Debug)]
 pub struct ShaderProgram {
-    id: u32,
+    pub(super) id: u32,
 }
 
 impl ShaderProgram {
-    pub fn new(vs_code: &CStr, fs_code: &CStr) -> Result<ShaderProgram, ShaderError> {
+    /// The `ShaderProgram` constructor.
+    ///
+    /// This function is unsafe, because a `ShaderProgram` needs to be properly deleted,
+    /// but `ShaderProgram` doesn't implement `Drop`.
+    pub(super) unsafe fn new(vs_code: &CStr, fs_code: &CStr) -> Result<ShaderProgram, ShaderError> {
         let vertex_shader = Shader::new_vertex_shader(vs_code)?;
         let fragment_shader = Shader::new_fragment_shader(fs_code)?;
 
@@ -99,13 +106,12 @@ impl ShaderProgram {
         }
 
         let shader_program = ShaderProgram { id: shader_program_id };
-
         shader_program.check_link_error()?;
 
         Ok(shader_program)
     }
 
-    pub fn check_link_error(&self) -> Result<(), ShaderError> {
+    fn check_link_error(&self) -> Result<(), ShaderError> {
         let mut success = gl::FALSE as i32;
         let mut info_log = Vec::with_capacity(INFO_LOG_SIZE);
 
@@ -128,8 +134,6 @@ impl ShaderProgram {
         }
     }
 
-    pub fn use_program(&self) { unsafe { gl::UseProgram(self.id) } }
-
     pub fn get_uniform<T>(&self, name: T) -> i32
         where
             T: AsRef<CStr>,
@@ -140,13 +144,4 @@ impl ShaderProgram {
             T: Accept,
             S: AsRef<CStr>
     { Uniform::new(value, self.get_uniform(name)) }
-}
-
-impl Drop for ShaderProgram {
-    fn drop(&mut self) {
-        unsafe {
-            gl::UseProgram(0);
-            gl::DeleteProgram(self.id);
-        }
-    }
 }

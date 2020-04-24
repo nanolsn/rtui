@@ -154,6 +154,14 @@ impl Accept for u32 {
     }
 }
 
+impl Accept for bool {
+    fn accept(&self, location: i32) {
+        unsafe {
+            gl::Uniform1i(location, (*self).into());
+        }
+    }
+}
+
 impl Accept for crate::common::color::Color {
     fn accept(&self, location: i32) {
         unsafe { gl::Uniform4f(location, self.0, self.1, self.2, self.3) }
