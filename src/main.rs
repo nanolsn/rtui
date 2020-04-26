@@ -7,10 +7,12 @@ use graphics::Window;
 use ui::image::Image;
 
 fn main() {
-    let rect = Rect::new((20, 40), (80, 40));
-    let img = Image::new("data/1.png");
+    let window = Window::new("App", (600, 400));
 
-    Window::new("App", (600, 400)).run(move |render| {
+    let rect = Rect::new((20, 40), (80, 40));
+    let img = Image::new("data/1.png", window.render());
+
+    window.run(move |render| {
         render.draw(&rect);
         render.draw(&img);
     });
