@@ -12,13 +12,18 @@ use super::{
 };
 
 #[derive(Debug)]
+struct RenderUniform {
+    projection: Uniform<glm::Mat4>,
+    texture0: Uniform<i32>,
+    draw_texture: Uniform<bool>,
+}
+
+#[derive(Debug)]
 pub struct Render {
     shaders: ShaderSet,
     size: Size,
     rect_render: RectRender,
-    projection: Uniform<glm::Mat4>,
-    texture0: Uniform<i32>,
-    draw_texture: Uniform<bool>,
+    uniform: RenderUniform,
 }
 
 impl Render {
@@ -70,9 +75,11 @@ impl Render {
             shaders,
             size: size.into(),
             rect_render: RectRender::new(0, 1),
-            projection,
-            texture0,
-            draw_texture,
+            uniform: RenderUniform {
+                projection,
+                texture0,
+                draw_texture,
+            },
         }
     }
 
@@ -84,8 +91,8 @@ impl Render {
 
         self.size = Size(w, h);
 
-        self.projection.set_value(glm::ortho(0.0, w as f32, 0.0, h as f32, 0.0, 100.0));
-        self.shaders.accept(&self.projection);
+        self.uniform.projection.set_value(glm::ortho(0.0, w as f32, 0.0, h as f32, 0.0, 100.0));
+        self.shaders.accept(&self.uniform.projection);
     }
 
     pub fn clear(&self, color: Color) {
@@ -105,13 +112,13 @@ impl Render {
     { draw.draw(self) }
 
     pub fn set_texture(&mut self, texture: &Texture) {
-        self.texture0.set_value(0);
-        self.shaders.accept(&self.texture0);
-        texture.bind(*self.texture0.as_ref() as u32);
+        self.uniform.texture0.set_value(0);
+        self.shaders.accept(&self.uniform.texture0);
+        texture.bind(*self.uniform.texture0.as_ref() as u32);
     }
 
     pub fn draw_texture(&mut self, draw: bool) {
-        self.draw_texture.set_value(draw);
-        self.draw_texture.accept(&self.shaders);
+        self.uniform.draw_texture.set_value(draw);
+        self.uniform.draw_texture.accept(&self.shaders);
     }
 }
