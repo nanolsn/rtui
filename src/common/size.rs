@@ -7,6 +7,9 @@ pub struct Size(pub u32, pub u32);
 impl Size {
     pub fn as_pos(&self) -> Pos { Pos(self.0 as i32, self.1 as i32) }
 
+    pub fn width(&self) -> u32 { self.0 }
+    pub fn height(&self) -> u32 { self.1 }
+
     pub fn half(self) -> Size { Size(self.0 / 2, self.1 / 2) }
 }
 
@@ -16,6 +19,10 @@ impl From<(i32, i32)> for Size {
 
 impl From<(u32, u32)> for Size {
     fn from((x, y): (u32, u32)) -> Self { Size(x, y) }
+}
+
+impl From<(f32, f32)> for Size {
+    fn from((x, y): (f32, f32)) -> Self { Size(x as u32, y as u32) }
 }
 
 impl From<glm::Vec2> for Size {

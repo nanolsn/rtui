@@ -5,5 +5,5 @@ pub trait Draw {
 }
 
 impl Draw for crate::common::Rect {
-    fn draw(&self, render: &mut Render) { render.draw_rect(self) }
+    fn draw(&self, render: &mut Render) { render.draw_rect(*self) }
 }

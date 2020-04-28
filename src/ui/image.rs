@@ -27,17 +27,13 @@ impl Image {
 
 impl Draw for Image {
     fn draw(&self, render: &mut Render) {
-        render.draw_texture(true);
-
         let texture_size = self.texture.size();
-        let rect = Rect::new(
-            render.size().half().as_pos() - texture_size.half(),
-            texture_size,
-        );
 
         render.set_texture(&self.texture);
-        render.draw_rect(&rect);
-
-        render.draw_texture(false);
+        render.draw_rect(Rect::new(
+            render.size().half().as_pos() - texture_size.half(),
+            texture_size,
+        ));
+        render.unset_texture();
     }
 }

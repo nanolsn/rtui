@@ -2,6 +2,7 @@
 mod macros;
 
 mod draw;
+mod font;
 mod rect_render;
 mod render;
 mod shaders;

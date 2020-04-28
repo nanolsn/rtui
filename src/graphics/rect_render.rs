@@ -51,12 +51,17 @@ impl RectRender {
         RectRender { vao, vbo }
     }
 
-    pub(super) fn draw(&self, rect: &Rect) {
+    pub(super) fn draw(&self, rect: Rect, st: Option<Rect>) {
+        let st = match st {
+            None => Rect::new((0.0, 0.0), (1.0, 1.0)),
+            Some(r) => r,
+        };
+
         let points: [glm::Vec4; 4] = [
-            glm::vec4(rect.left() as f32, rect.top() as f32, 0.0, 0.0),
-            glm::vec4(rect.left() as f32, rect.bot() as f32, 0.0, 1.0),
-            glm::vec4(rect.right() as f32, rect.bot() as f32, 1.0, 1.0),
-            glm::vec4(rect.right() as f32, rect.top() as f32, 1.0, 0.0),
+            glm::vec4(rect.left() as f32, rect.top() as f32, st.left() as f32, st.bot() as f32),
+            glm::vec4(rect.left() as f32, rect.bot() as f32, st.left() as f32, st.top() as f32),
+            glm::vec4(rect.right() as f32, rect.bot() as f32, st.right() as f32, st.top() as f32),
+            glm::vec4(rect.right() as f32, rect.top() as f32, st.right() as f32, st.bot() as f32),
         ];
 
         unsafe {

@@ -105,9 +105,13 @@ impl Render {
         }
     }
 
-    pub fn use_program(&mut self) { self.shaders.use_shader(0) }
+    pub fn use_program(&mut self) {
+        const DEFAULT_SHADER: usize = 0;
 
-    pub fn draw_rect(&self, rect: &Rect) { self.rect_render.draw(rect) }
+        self.shaders.use_shader(DEFAULT_SHADER);
+    }
+
+    pub fn draw_rect(&self, rect: Rect) { self.rect_render.draw(rect, None) }
 
     pub fn draw<D>(&mut self, draw: &D)
         where
@@ -115,13 +119,13 @@ impl Render {
     { draw.draw(self) }
 
     pub fn set_texture(&mut self, texture: &Texture) {
-        self.uniform.texture0.set_value(0);
-        self.shaders.accept(&self.uniform.texture0);
+        const TEXTURE0_UNIT: i32 = 0;
+
+        self.uniform.texture0.set(TEXTURE0_UNIT, &self.shaders);
         texture.bind(self.uniform.texture0.get() as u32);
+
+        self.uniform.draw_texture.set(true, &self.shaders);
     }
 
-    pub fn draw_texture(&mut self, draw: bool) {
-        self.uniform.draw_texture.set_value(draw);
-        self.shaders.accept(&self.uniform.draw_texture);
-    }
+    pub fn unset_texture(&mut self) { self.uniform.draw_texture.set(false, &self.shaders) }
 }

@@ -56,13 +56,22 @@ impl<T> Uniform<T>
 
     pub fn accept(&self, shader: &ShaderSet) {
         if !self.accepted.get() {
-            match shader.active() {
-                Some(shader) if shader.id() == self.shader => {
-                    self.value.accept(self.location);
-                    self.accepted.set(true);
-                }
-                _ => panic!("Shader {} is not used!", self.shader),
+            self.direct_accept(shader);
+        }
+    }
+
+    pub fn set(&mut self, value: T, shader: &ShaderSet) {
+        self.value = value;
+        self.direct_accept(shader);
+    }
+
+    fn direct_accept(&self, shader: &ShaderSet) {
+        match shader.active() {
+            Some(shader) if shader.id() == self.shader => {
+                self.value.accept(self.location);
+                self.accepted.set(true);
             }
+            _ => panic!("Shader {} is not used!", self.shader),
         }
     }
 }

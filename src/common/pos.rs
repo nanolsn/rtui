@@ -6,6 +6,9 @@ pub struct Pos(pub i32, pub i32);
 
 impl Pos {
     pub fn as_size(&self) -> Size { Size(self.0 as u32, self.1 as u32) }
+
+    pub fn x(&self) -> i32 { self.0 }
+    pub fn y(&self) -> i32 { self.1 }
 }
 
 impl From<(i32, i32)> for Pos {
@@ -14,6 +17,10 @@ impl From<(i32, i32)> for Pos {
 
 impl From<(u32, u32)> for Pos {
     fn from((x, y): (u32, u32)) -> Self { Pos(x as i32, y as i32) }
+}
+
+impl From<(f32, f32)> for Pos {
+    fn from((x, y): (f32, f32)) -> Self { Pos(x as i32, y as i32) }
 }
 
 impl From<glm::Vec2> for Pos {
@@ -78,52 +85,4 @@ impl std::ops::Div<i32> for Pos {
     type Output = Pos;
 
     fn div(self, rhs: i32) -> Self::Output { Pos(self.0 / rhs, self.1 / rhs) }
-}
-
-impl std::ops::Rem<i32> for Pos {
-    type Output = Pos;
-
-    fn rem(self, rhs: i32) -> Self::Output { Pos(self.0 % rhs, self.1 % rhs) }
-}
-
-impl std::ops::MulAssign<i32> for Pos {
-    fn mul_assign(&mut self, rhs: i32) { *self = *self * rhs }
-}
-
-impl std::ops::DivAssign<i32> for Pos {
-    fn div_assign(&mut self, rhs: i32) { *self = *self / rhs }
-}
-
-impl std::ops::RemAssign<i32> for Pos {
-    fn rem_assign(&mut self, rhs: i32) { *self = *self % rhs }
-}
-
-impl std::ops::Mul<u32> for Pos {
-    type Output = Pos;
-
-    fn mul(self, rhs: u32) -> Self::Output { Pos(self.0 * rhs as i32, self.1 * rhs as i32) }
-}
-
-impl std::ops::Div<u32> for Pos {
-    type Output = Pos;
-
-    fn div(self, rhs: u32) -> Self::Output { Pos(self.0 / rhs as i32, self.1 / rhs as i32) }
-}
-
-impl std::ops::Rem<u32> for Pos {
-    type Output = Pos;
-
-    fn rem(self, rhs: u32) -> Self::Output { Pos(self.0 % rhs as i32, self.1 % rhs as i32) }
-}
-
-impl std::ops::MulAssign<u32> for Pos {
-    fn mul_assign(&mut self, rhs: u32) { *self = *self * rhs }
-}
-
-impl std::ops::DivAssign<u32> for Pos {
-    fn div_assign(&mut self, rhs: u32) { *self = *self / rhs }
-}
-
-impl std::ops::RemAssign<u32> for Pos {
-    fn rem_assign(&mut self, rhs: u32) { *self = *self % rhs }
 }
