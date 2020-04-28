@@ -16,6 +16,7 @@ struct RenderUniform {
     projection: Uniform<glm::Mat4>,
     texture0: Uniform<i32>,
     draw_texture: Uniform<bool>,
+    col: Uniform<Color>,
 }
 
 #[derive(Debug)]
@@ -59,17 +60,17 @@ impl Render {
 
         shaders.accept(&texture0);
 
-        let col = shaders
-            .make_uniform(Color::white(), c_str!("col"))
-            .unwrap();
-
-        shaders.accept(&col);
-
         let draw_texture = shaders
             .make_uniform(false, c_str!("draw_texture"))
             .unwrap();
 
         shaders.accept(&draw_texture);
+
+        let col = shaders
+            .make_uniform(Color::white(), c_str!("col"))
+            .unwrap();
+
+        shaders.accept(&col);
 
         Render {
             shaders,
@@ -79,6 +80,7 @@ impl Render {
                 projection,
                 texture0,
                 draw_texture,
+                col,
             },
         }
     }
@@ -115,11 +117,11 @@ impl Render {
     pub fn set_texture(&mut self, texture: &Texture) {
         self.uniform.texture0.set_value(0);
         self.shaders.accept(&self.uniform.texture0);
-        texture.bind(*self.uniform.texture0.as_ref() as u32);
+        texture.bind(self.uniform.texture0.get() as u32);
     }
 
     pub fn draw_texture(&mut self, draw: bool) {
         self.uniform.draw_texture.set_value(draw);
-        self.uniform.draw_texture.accept(&self.shaders);
+        self.shaders.accept(&self.uniform.draw_texture);
     }
 }

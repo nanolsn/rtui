@@ -40,7 +40,6 @@ impl<T> Uniform<T>
         })
     }
 
-    #[allow(dead_code)]
     pub fn set_value(&mut self, value: T) {
         self.value = value;
         self.accepted.set(false);
@@ -66,6 +65,13 @@ impl<T> Uniform<T>
             }
         }
     }
+}
+
+impl<T> Uniform<T>
+    where
+        T: Copy + Accept,
+{
+    pub fn get(&self) -> T { self.value }
 }
 
 impl<T> AsRef<T> for Uniform<T>
