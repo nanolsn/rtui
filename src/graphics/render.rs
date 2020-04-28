@@ -1,5 +1,9 @@
 use super::{
-    super::common::{Color, Rect},
+    super::common::{
+        Color,
+        Rect,
+        Size,
+    },
     shaders::ShaderSet,
     rect_render::RectRender,
     uniform::Uniform,
@@ -10,7 +14,7 @@ use super::{
 #[derive(Debug)]
 pub struct Render {
     shaders: ShaderSet,
-    size: (u32, u32),
+    size: Size,
     rect_render: RectRender,
     projection: Uniform<glm::Mat4>,
     texture0: Uniform<i32>,
@@ -64,7 +68,7 @@ impl Render {
 
         Render {
             shaders,
-            size,
+            size: size.into(),
             rect_render: RectRender::new(0, 1),
             projection,
             texture0,
@@ -73,12 +77,12 @@ impl Render {
     }
 
     #[allow(dead_code)]
-    pub fn size(&self) -> (u32, u32) { self.size }
+    pub fn size(&self) -> Size { self.size }
 
-    pub fn resize(&mut self, (w, h): (u32, u32)) {
+    pub fn resize(&mut self, Size(w, h): Size) {
         unsafe { gl::Viewport(0, 0, w as i32, h as i32) }
 
-        self.size = (w, h);
+        self.size = Size(w, h);
 
         self.projection.set_value(glm::ortho(0.0, w as f32, 0.0, h as f32, 0.0, 100.0));
         self.shaders.accept(&self.projection);

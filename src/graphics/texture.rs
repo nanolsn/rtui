@@ -4,6 +4,8 @@ use image::{
     ImageError,
 };
 
+use crate::common::Size;
+
 #[derive(Debug)]
 pub enum TextureError {
     ImageError(ImageError),
@@ -100,7 +102,7 @@ impl Texture {
 
     pub fn height(&self) -> u32 { self.height }
 
-    pub fn size(&self) -> (u32, u32) { (self.width, self.height) }
+    pub fn size(&self) -> Size { Size(self.width, self.height) }
 }
 
 impl Drop for Texture {

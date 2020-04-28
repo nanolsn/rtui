@@ -1,3 +1,5 @@
+use super::{Pos, Size};
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct Rect {
     pub x: i32,
@@ -8,13 +10,25 @@ pub struct Rect {
 
 #[allow(dead_code)]
 impl Rect {
-    pub fn new((x, y): (i32, i32), (width, height): (u32, u32)) -> Self {
-        Rect { x, y, width, height }
+    pub fn new<P, S>(pos: P, size: S) -> Self
+        where
+            P: Into<Pos>,
+            S: Into<Size>,
+    {
+        let pos = pos.into();
+        let size = size.into();
+
+        Rect {
+            x: pos.0,
+            y: pos.1,
+            width: size.0,
+            height: size.1,
+        }
     }
 
-    pub fn pos(&self) -> (i32, i32) { (self.x, self.y) }
+    pub fn pos(&self) -> Pos { Pos(self.x, self.y) }
 
-    pub fn size(&self) -> (u32, u32) { (self.width, self.height) }
+    pub fn size(&self) -> Size { Size(self.width, self.height) }
 
     pub fn left(&self) -> i32 { self.x }
 
@@ -23,6 +37,8 @@ impl Rect {
     pub fn bot(&self) -> i32 { self.y }
 
     pub fn top(&self) -> i32 { self.y + self.height as i32 }
+
+    pub fn center(&self) -> Pos { self.pos() + self.size().half() }
 
     pub fn intersects_point(&self, (a, b): (i32, i32)) -> bool {
         self.left() <= a && a < self.right()

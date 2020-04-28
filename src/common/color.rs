@@ -26,3 +26,11 @@ impl From<(f32, f32, f32)> for Color {
 impl From<(f32, f32, f32, f32)> for Color {
     fn from((r, g, b, a): (f32, f32, f32, f32)) -> Self { Color(r, g, b, a) }
 }
+
+impl From<glm::Vec3> for Color {
+    fn from(v: glm::Vec3) -> Self { Color(v.x, v.y, v.z, 1.0) }
+}
+
+impl From<glm::Vec4> for Color {
+    fn from(v: glm::Vec4) -> Self { Color(v.x, v.y, v.z, v.w) }
+}

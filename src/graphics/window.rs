@@ -1,6 +1,9 @@
 use super::render::Render;
 use crate::{
-    common::Color,
+    common::{
+        Color,
+        Size,
+    },
     ui::root::Root,
 };
 
@@ -74,7 +77,8 @@ impl Window {
             match event {
                 Event::WindowEvent { event, .. } => match event {
                     WindowEvent::Resized(size) => {
-                        render.resize(size.into());
+                        let (w, h) = size.into();
+                        render.resize(Size(w, h));
                         context.resize(size);
                     }
                     WindowEvent::CloseRequested => { *control_flow = ControlFlow::Exit }

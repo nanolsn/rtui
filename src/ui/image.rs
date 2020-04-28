@@ -29,11 +29,10 @@ impl Draw for Image {
     fn draw(&self, render: &mut Render) {
         render.draw_texture(true);
 
-        let (sw, sh) = render.size();
-        let (w, h) = self.texture.size();
+        let texture_size = self.texture.size();
         let rect = Rect::new(
-            (sw as i32 / 2 - w as i32 / 2, sh as i32 / 2 - h as i32 / 2),
-            (w, h),
+            render.size().half().as_pos() - texture_size.half(),
+            texture_size,
         );
 
         render.set_texture(&self.texture);
