@@ -91,7 +91,8 @@ impl Render {
 
         self.size = Size(w, h);
 
-        self.uniform.projection.set_value(glm::ortho(0.0, w as f32, 0.0, h as f32, 0.0, 100.0));
+        let projection = glm::ortho(0.0, w as f32, 0.0, h as f32, 0.0, 100.0);
+        self.uniform.projection.set_value(projection);
         self.shaders.accept(&self.uniform.projection);
     }
 

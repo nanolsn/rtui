@@ -97,3 +97,33 @@ impl std::ops::DivAssign<i32> for Pos {
 impl std::ops::RemAssign<i32> for Pos {
     fn rem_assign(&mut self, rhs: i32) { *self = *self % rhs }
 }
+
+impl std::ops::Mul<u32> for Pos {
+    type Output = Pos;
+
+    fn mul(self, rhs: u32) -> Self::Output { Pos(self.0 * rhs as i32, self.1 * rhs as i32) }
+}
+
+impl std::ops::Div<u32> for Pos {
+    type Output = Pos;
+
+    fn div(self, rhs: u32) -> Self::Output { Pos(self.0 / rhs as i32, self.1 / rhs as i32) }
+}
+
+impl std::ops::Rem<u32> for Pos {
+    type Output = Pos;
+
+    fn rem(self, rhs: u32) -> Self::Output { Pos(self.0 % rhs as i32, self.1 % rhs as i32) }
+}
+
+impl std::ops::MulAssign<u32> for Pos {
+    fn mul_assign(&mut self, rhs: u32) { *self = *self * rhs }
+}
+
+impl std::ops::DivAssign<u32> for Pos {
+    fn div_assign(&mut self, rhs: u32) { *self = *self / rhs }
+}
+
+impl std::ops::RemAssign<u32> for Pos {
+    fn rem_assign(&mut self, rhs: u32) { *self = *self % rhs }
+}
