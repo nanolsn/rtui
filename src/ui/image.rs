@@ -6,7 +6,6 @@ use crate::{
         Draw,
     },
 };
-use crate::common::Vec2D;
 
 #[derive(Debug)]
 pub struct Image {
@@ -28,7 +27,7 @@ impl Image {
 
 impl Draw for Image {
     fn draw(&self, render: &mut Render) {
-        let texture_size: Vec2D<f32> = self.texture.size().cast();
+        let texture_size = self.texture.size().cast();
 
         render.set_texture(&self.texture);
         render.draw_rect(Rect::new(
