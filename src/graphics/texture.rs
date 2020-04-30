@@ -4,7 +4,7 @@ use image::{
     ImageError,
 };
 
-use crate::common::Size;
+use crate::common::Vec2D;
 
 #[derive(Debug)]
 pub enum TextureError {
@@ -102,7 +102,7 @@ impl Texture {
 
     pub fn height(&self) -> u32 { self.height }
 
-    pub fn size(&self) -> Size { Size(self.width, self.height) }
+    pub fn size(&self) -> Vec2D<u32> { Vec2D::new(self.width, self.height) }
 }
 
 impl Drop for Texture {

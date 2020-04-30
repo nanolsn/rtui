@@ -6,11 +6,31 @@ pub struct Vec2D<T> {
 
 impl<T> Vec2D<T> {
     pub fn new(x: T, y: T) -> Self { Vec2D { x, y } }
+
+    pub fn try_cast<U>(self) -> Option<Vec2D<U>>
+        where
+            T: num::NumCast,
+            U: num::NumCast,
+    {
+        let x: Option<U> = num::cast(self.x);
+        let y: Option<U> = num::cast(self.y);
+
+        match (x, y) {
+            (Some(x), Some(y)) => Some(Vec2D::new(x, y)),
+            _ => None,
+        }
+    }
+
+    pub fn cast<U>(self) -> Vec2D<U>
+        where
+            T: num::NumCast,
+            U: num::NumCast,
+    { self.try_cast().expect("Some value can't be represented by the target type") }
 }
 
 impl<T> Vec2D<T>
     where
-        T: Copy + std::ops::Div<Output=T> + std::ops::Add<Output=T> + num::One,
+        T: Copy + num::Num,
 {
     pub fn half(self) -> Vec2D<T> { self / (T::one() + T::one()) }
 }
@@ -61,9 +81,7 @@ impl<T, R> std::ops::AddAssign<R> for Vec2D<T>
         R: Into<Vec2D<T>>,
         T: std::ops::Add<T, Output=T> + Copy,
 {
-    fn add_assign(&mut self, rhs: R) {
-        *self = *self + rhs
-    }
+    fn add_assign(&mut self, rhs: R) { *self = *self + rhs }
 }
 
 impl<T, R> std::ops::SubAssign<R> for Vec2D<T>
@@ -71,9 +89,7 @@ impl<T, R> std::ops::SubAssign<R> for Vec2D<T>
         R: Into<Vec2D<T>>,
         T: std::ops::Sub<T, Output=T> + Copy,
 {
-    fn sub_assign(&mut self, rhs: R) {
-        *self = *self - rhs
-    }
+    fn sub_assign(&mut self, rhs: R) { *self = *self - rhs }
 }
 
 impl<T> std::ops::Mul<T> for Vec2D<T>

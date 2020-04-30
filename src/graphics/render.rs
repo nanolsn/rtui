@@ -2,7 +2,7 @@ use super::{
     super::common::{
         Color,
         Rect,
-        Size,
+        Vec2D,
     },
     shaders::ShaderSet,
     rect_render::RectRender,
@@ -22,7 +22,7 @@ struct RenderUniform {
 #[derive(Debug)]
 pub struct Render {
     shaders: ShaderSet,
-    size: Size,
+    size: Vec2D<u32>,
     rect_render: RectRender,
     uniform: RenderUniform,
 }
@@ -86,14 +86,14 @@ impl Render {
     }
 
     #[allow(dead_code)]
-    pub fn size(&self) -> Size { self.size }
+    pub fn size(&self) -> Vec2D<u32> { self.size }
 
-    pub fn resize(&mut self, Size(w, h): Size) {
-        unsafe { gl::Viewport(0, 0, w as i32, h as i32) }
+    pub fn resize(&mut self, size: Vec2D<u32>) {
+        unsafe { gl::Viewport(0, 0, size.x as i32, size.y as i32) }
 
-        self.size = Size(w, h);
+        self.size = size;
 
-        let projection = glm::ortho(0.0, w as f32, 0.0, h as f32, 0.0, 100.0);
+        let projection = glm::ortho(0.0, size.x as f32, 0.0, size.y as f32, 0.0, 100.0);
         self.uniform.projection.set_value(projection);
         self.shaders.accept(&self.uniform.projection);
     }
@@ -111,7 +111,13 @@ impl Render {
         self.shaders.use_shader(DEFAULT_SHADER);
     }
 
-    pub fn draw_rect(&self, rect: Rect) { self.rect_render.draw(rect, None) }
+    pub fn draw_rect(&self, rect: Rect<f32>) {
+        self.rect_render.draw(rect, None);
+    }
+
+    pub fn draw_rect_st(&self, rect: Rect<f32>, st: Rect<f32>) {
+        self.rect_render.draw(rect, Some(st));
+    }
 
     pub fn draw<D>(&mut self, draw: &D)
         where
@@ -127,5 +133,7 @@ impl Render {
         self.uniform.draw_texture.set(true, &self.shaders);
     }
 
-    pub fn unset_texture(&mut self) { self.uniform.draw_texture.set(false, &self.shaders) }
+    pub fn unset_texture(&mut self) {
+        self.uniform.draw_texture.set(false, &self.shaders);
+    }
 }

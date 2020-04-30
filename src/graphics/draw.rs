@@ -1,9 +1,18 @@
-use super::Render;
+use super::{
+    super::Rect,
+    Render,
+};
 
 pub trait Draw {
     fn draw(&self, render: &mut Render);
 }
 
-impl Draw for crate::common::Rect {
-    fn draw(&self, render: &mut Render) { render.draw_rect(*self) }
+impl<T> Draw for Rect<T>
+    where
+        T: num::NumCast + Copy,
+{
+    fn draw(&self, render: &mut Render) {
+        let rect: Rect<f32> = self.cast();
+        render.draw_rect(rect);
+    }
 }
