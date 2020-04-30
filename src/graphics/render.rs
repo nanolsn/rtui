@@ -28,7 +28,7 @@ pub struct Render {
     size: Vec2D<u32>,
     rect_render: RectRender,
     font_render: Rc<Font>,
-    uniform: RenderUniform,
+    render_uniform: RenderUniform,
 }
 
 impl Render {
@@ -83,7 +83,7 @@ impl Render {
             size: size.into(),
             rect_render: RectRender::new(0, 1),
             font_render: Rc::new(Font::new()),
-            uniform: RenderUniform {
+            render_uniform: RenderUniform {
                 projection,
                 texture0,
                 draw_texture,
@@ -111,8 +111,8 @@ impl Render {
         self.size = size;
 
         let projection = glm::ortho(0.0, size.x as f32, 0.0, size.y as f32, 0.0, 100.0);
-        self.uniform.projection.set_value(projection);
-        self.shaders.accept(&self.uniform.projection);
+        self.render_uniform.projection.set_value(projection);
+        self.shaders.accept(&self.render_uniform.projection);
     }
 
     pub fn clear(&self, color: Color) {
@@ -120,12 +120,6 @@ impl Render {
             gl::ClearColor(color.r(), color.g(), color.b(), 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
-    }
-
-    pub fn use_program(&mut self) {
-        const DEFAULT_SHADER: usize = 0;
-
-        self.shaders.use_shader(DEFAULT_SHADER);
     }
 
     pub fn draw_rect(&self, rect: Rect<f32>) { self.rect_render.draw(rect, None) }
@@ -142,13 +136,13 @@ impl Render {
     pub fn set_texture(&mut self, texture: &Texture) {
         const TEXTURE0_UNIT: i32 = 0;
 
-        self.uniform.texture0.set(TEXTURE0_UNIT, &self.shaders);
-        texture.bind(self.uniform.texture0.get() as u32);
+        self.render_uniform.texture0.set(TEXTURE0_UNIT, &self.shaders);
+        texture.bind(self.render_uniform.texture0.get() as u32);
 
-        self.uniform.draw_texture.set(true, &self.shaders);
+        self.render_uniform.draw_texture.set(true, &self.shaders);
     }
 
-    pub fn unset_texture(&mut self) { self.uniform.draw_texture.set(false, &self.shaders) }
+    pub fn unset_texture(&mut self) { self.render_uniform.draw_texture.set(false, &self.shaders) }
 
     pub fn print(&mut self, text: &str) {
         let font = Rc::clone(&self.font_render);

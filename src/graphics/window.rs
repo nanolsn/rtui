@@ -88,7 +88,6 @@ impl Window {
                 Event::NewEvents(StartCause::Poll) => {
                     if !focused { return; }
 
-                    render.use_program();
                     render.clear(root.bg);
 
                     f(&mut render);
