@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use super::{
     super::common::{
         Color,
@@ -6,6 +8,7 @@ use super::{
     },
     shaders::ShaderSet,
     rect_render::RectRender,
+    font::Font,
     uniform::Uniform,
     texture::Texture,
     Draw,
@@ -24,12 +27,15 @@ pub struct Render {
     shaders: ShaderSet,
     size: Vec2D<u32>,
     rect_render: RectRender,
+    font_render: Rc<Font>,
     uniform: RenderUniform,
 }
 
 impl Render {
     pub fn new(context: &glutin::WindowedContext<glutin::PossiblyCurrent>) -> Self {
         gl::load_with(|ptr| context.get_proc_address(ptr) as *const _);
+
+        Render::set_defaults();
 
         let mut shaders = ShaderSet::new();
 
@@ -76,12 +82,23 @@ impl Render {
             shaders,
             size: size.into(),
             rect_render: RectRender::new(0, 1),
+            font_render: Rc::new(Font::new()),
             uniform: RenderUniform {
                 projection,
                 texture0,
                 draw_texture,
                 col,
             },
+        }
+    }
+
+    fn set_defaults() {
+        unsafe {
+            gl::Enable(gl::BLEND);
+            gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
+
+            gl::Disable(gl::DEPTH_TEST);
+            gl::Disable(gl::CULL_FACE);
         }
     }
 
@@ -111,9 +128,7 @@ impl Render {
         self.shaders.use_shader(DEFAULT_SHADER);
     }
 
-    pub fn draw_rect(&self, rect: Rect<f32>) {
-        self.rect_render.draw(rect, None);
-    }
+    pub fn draw_rect(&self, rect: Rect<f32>) { self.rect_render.draw(rect, None) }
 
     pub fn draw_rect_st(&self, rect: Rect<f32>, st: Rect<f32>) {
         self.rect_render.draw(rect, Some(st));
@@ -133,7 +148,14 @@ impl Render {
         self.uniform.draw_texture.set(true, &self.shaders);
     }
 
-    pub fn unset_texture(&mut self) {
-        self.uniform.draw_texture.set(false, &self.shaders);
+    pub fn unset_texture(&mut self) { self.uniform.draw_texture.set(false, &self.shaders) }
+
+    pub fn print(&mut self, text: &str) {
+        let font = Rc::clone(&self.font_render);
+
+        let half = self.size.half().cast::<f32>();
+        let text_half = font.text_size(text).half().cast::<f32>();
+
+        font.print(self, text, half - text_half);
     }
 }

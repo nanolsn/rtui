@@ -34,6 +34,5 @@ impl Draw for Image {
             render.size().half().cast::<f32>() - texture_size.half(),
             texture_size,
         ));
-        render.unset_texture();
     }
 }

@@ -48,7 +48,6 @@ impl<T> Rect<T> {
     { self.try_cast().expect("Some value can't be represented by the target type") }
 }
 
-#[allow(dead_code)]
 impl<T> Rect<T>
     where
         T: Copy,
@@ -58,6 +57,7 @@ impl<T> Rect<T>
     pub fn size(&self) -> Vec2D<T> { Vec2D::new(self.width, self.height) }
 }
 
+#[allow(dead_code)]
 impl<T> Rect<T>
     where
         T: Copy + num::Num,
@@ -73,6 +73,7 @@ impl<T> Rect<T>
     pub fn center(&self) -> Vec2D<T> { self.pos() + self.size().half() }
 }
 
+#[allow(dead_code)]
 impl<T> Rect<T>
     where
         T: Copy + num::Num + PartialOrd,

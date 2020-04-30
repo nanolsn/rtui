@@ -11,9 +11,11 @@ fn main() {
 
     let rect = Rect::new((20, 40), (80, 40));
     let img = Image::new("data/1.png", window.render());
+    let hello = String::from("this repository understand your project by adding a README.");
 
     window.run(move |render| {
         render.draw(&rect);
         render.draw(&img);
+        render.draw(&hello);
     });
 }
