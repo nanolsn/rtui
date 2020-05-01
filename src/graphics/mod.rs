@@ -5,6 +5,7 @@ mod draw;
 mod font;
 mod rect_render;
 mod render;
+mod shader_data;
 mod shaders;
 mod texture;
 mod uniform;
