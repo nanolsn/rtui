@@ -1,9 +1,11 @@
 use std::ffi::CStr;
 
-use super::uniform::{
-    Accept,
-    Uniform,
-    UniformError,
+use super::{
+    accept::Accept,
+    uniform::{
+        Uniform,
+        UniformError,
+    },
 };
 
 const INFO_LOG_SIZE: usize = 512;
@@ -163,6 +165,8 @@ impl ShaderSet {
             None
         }
     }
+
+    pub fn used(&self) -> Option<usize> { self.used }
 
     pub fn use_shader(&mut self, idx: usize) {
         match self.used {

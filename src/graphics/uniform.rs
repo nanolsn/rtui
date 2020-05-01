@@ -1,11 +1,10 @@
-use super::shaders::{
-    ShaderProgram,
-    ShaderSet,
+use super::{
+    accept::Accept,
+    shaders::{
+        ShaderProgram,
+        ShaderSet,
+    },
 };
-
-pub trait Accept {
-    fn accept(&self, location: i32);
-}
 
 #[derive(Debug)]
 pub enum UniformError {
@@ -19,7 +18,7 @@ pub struct Uniform<T>
 {
     value: T,
     location: i32,
-    pub(super) shader: u32,
+    shader: u32,
     accepted: std::cell::Cell<bool>,
 }
 
@@ -71,7 +70,7 @@ impl<T> Uniform<T>
                 self.value.accept(self.location);
                 self.accepted.set(true);
             }
-            _ => panic!("Shader {} is not used!", self.shader),
+            _ => panic!("Shader {} is not used! (Used: {:?})", self.shader, shader.used()),
         }
     }
 }
@@ -100,98 +99,102 @@ impl<T> AsMut<T> for Uniform<T>
     }
 }
 
-impl Accept for glm::Vec1 {
-    fn accept(&self, location: i32) {
-        unsafe {
-            gl::Uniform1f(location, self.x);
+#[derive(Debug)]
+pub struct UniformData {
+    location: i32,
+    shader_idx: usize,
+}
+
+#[derive(Debug)]
+pub struct SharedUniform<T>
+    where
+        T: Accept,
+{
+    value: T,
+    data: Vec<UniformData>,
+    accepted: std::cell::Cell<bool>,
+}
+
+impl<T> SharedUniform<T>
+    where
+        T: Accept,
+{
+    pub fn new(value: T, shader_data: Vec<(i32, usize)>) -> Result<Self, UniformError> {
+        let mut data = vec![];
+
+        for (location, shader_idx) in shader_data {
+            if location < 0 {
+                return Err(UniformError::IncorrectLocation);
+            }
+
+            data.push(UniformData {
+                location,
+                shader_idx,
+            });
         }
+
+        Ok(SharedUniform {
+            value,
+            data,
+            accepted: std::cell::Cell::new(false),
+        })
+    }
+
+    pub fn set_value(&mut self, value: T) {
+        self.value = value;
+        self.accepted.set(false);
+    }
+
+    #[allow(dead_code)]
+    pub fn update_value<F>(&mut self, f: F)
+        where
+            F: FnOnce(&mut T),
+    {
+        f(&mut self.value);
+        self.accepted.set(false);
+    }
+
+    pub fn accept(&self, shader: &mut ShaderSet) {
+        if !self.accepted.get() {
+            self.direct_accept(shader);
+        }
+    }
+
+    pub fn set(&mut self, value: T, shader: &mut ShaderSet) {
+        self.value = value;
+        self.direct_accept(shader);
+    }
+
+    fn direct_accept(&self, shader: &mut ShaderSet) {
+        for data in self.data.iter() {
+            shader.use_shader(data.shader_idx);
+            self.value.accept(data.location);
+        }
+
+        self.accepted.set(true);
     }
 }
 
-impl Accept for glm::Vec2 {
-    fn accept(&self, location: i32) {
-        unsafe {
-            gl::Uniform2f(location, self.x, self.y);
-        }
-    }
+impl<T> SharedUniform<T>
+    where
+        T: Copy + Accept,
+{
+    pub fn get(&self) -> T { self.value }
 }
 
-impl Accept for glm::Vec3 {
-    fn accept(&self, location: i32) {
-        unsafe {
-            gl::Uniform3f(location, self.x, self.y, self.z);
-        }
-    }
+impl<T> AsRef<T> for SharedUniform<T>
+    where
+        T: Accept,
+{
+    fn as_ref(&self) -> &T { &self.value }
 }
 
-impl Accept for glm::Vec4 {
-    fn accept(&self, location: i32) {
-        unsafe {
-            gl::Uniform4f(location, self.x, self.y, self.z, self.w);
-        }
-    }
-}
-
-impl Accept for glm::Mat2 {
-    fn accept(&self, location: i32) {
-        unsafe {
-            gl::UniformMatrix2fv(location, 1, gl::FALSE, self.as_ptr());
-        }
-    }
-}
-
-impl Accept for glm::Mat3 {
-    fn accept(&self, location: i32) {
-        unsafe {
-            gl::UniformMatrix3fv(location, 1, gl::FALSE, self.as_ptr());
-        }
-    }
-}
-
-impl Accept for glm::Mat4 {
-    fn accept(&self, location: i32) {
-        unsafe {
-            gl::UniformMatrix4fv(location, 1, gl::FALSE, self.as_ptr());
-        }
-    }
-}
-
-impl Accept for f32 {
-    fn accept(&self, location: i32) {
-        unsafe {
-            gl::Uniform1f(location, *self);
-        }
-    }
-}
-
-impl Accept for i32 {
-    fn accept(&self, location: i32) {
-        unsafe {
-            gl::Uniform1i(location, *self);
-        }
-    }
-}
-
-impl Accept for u32 {
-    fn accept(&self, location: i32) {
-        unsafe {
-            gl::Uniform1ui(location, *self);
-        }
-    }
-}
-
-impl Accept for bool {
-    fn accept(&self, location: i32) {
-        unsafe {
-            gl::Uniform1i(location, (*self).into());
-        }
-    }
-}
-
-impl Accept for crate::common::Color {
-    fn accept(&self, location: i32) {
-        unsafe {
-            gl::Uniform4f(location, self.0, self.1, self.2, self.3);
-        }
+impl<T> AsMut<T> for SharedUniform<T>
+    where
+        T: Accept,
+{
+    fn as_mut(&mut self) -> &mut T {
+        self.accepted.set(false);
+        &mut self.value
     }
 }

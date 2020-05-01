@@ -1,6 +1,7 @@
 use super::{
     super::Rect,
     Render,
+    UsedShader,
 };
 
 pub trait Draw {
@@ -12,6 +13,8 @@ impl<T> Draw for Rect<T>
         T: num::NumCast + Copy,
 {
     fn draw(&self, render: &mut Render) {
+        render.use_shader(UsedShader::Base);
+
         let rect: Rect<f32> = self.cast();
 
         render.unset_texture();
@@ -20,7 +23,10 @@ impl<T> Draw for Rect<T>
 }
 
 impl Draw for &str {
-    fn draw(&self, render: &mut Render) { render.print(self) }
+    fn draw(&self, render: &mut Render) {
+        render.use_shader(UsedShader::Font);
+        render.print(self);
+    }
 }
 
 impl Draw for String {

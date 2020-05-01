@@ -4,6 +4,7 @@ use crate::{
         Texture,
         Render,
         Draw,
+        UsedShader,
     },
 };
 
@@ -27,6 +28,8 @@ impl Image {
 
 impl Draw for Image {
     fn draw(&self, render: &mut Render) {
+        render.use_shader(UsedShader::Base);
+
         let texture_size = self.texture.size().cast();
 
         render.set_texture(&self.texture);
