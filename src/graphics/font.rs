@@ -46,7 +46,7 @@ impl Font {
 
             let st_rect = Rect::new((s, t), (Font::S_CHAR, Font::T_CHAR));
 
-            render.draw_rect_st(UsedShader::Font, char_rect, st_rect);
+            render.draw_rect_accept(UsedShader::Font, char_rect, Some(st_rect));
         }
     }
 

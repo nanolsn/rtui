@@ -190,7 +190,7 @@ impl ShaderSet {
 
     pub fn accept<T>(&self, uniform: &Uniform<T>)
         where
-            T: Accept,
+            T: Accept + PartialEq,
     { uniform.accept(self) }
 
     pub fn get_uniform<T>(&self, name: T) -> i32
@@ -227,7 +227,7 @@ impl ShaderSet {
 
     pub fn make_uniform<T, S>(&self, value: T, name: S) -> Result<Uniform<T>, UniformError>
         where
-            T: Accept,
+            T: Accept + PartialEq,
             S: AsRef<CStr>
     {
         if let Some(shader) = self.active() {

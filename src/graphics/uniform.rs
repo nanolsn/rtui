@@ -24,7 +24,7 @@ pub struct Uniform<T>
 
 impl<T> Uniform<T>
     where
-        T: Accept,
+        T: Accept + PartialEq,
 {
     pub fn new(value: T, location: i32, shader: &ShaderProgram) -> Result<Self, UniformError> {
         if location < 0 {
@@ -40,23 +40,19 @@ impl<T> Uniform<T>
     }
 
     pub fn set_value(&mut self, value: T) {
+        if value == self.value {
+            return;
+        }
+
         self.value = value;
         self.accepted.set(false);
     }
 
     pub fn accept(&self, shader: &ShaderSet) {
-        if !self.accepted.get() {
-            self.direct_accept(shader);
+        if self.accepted.get() {
+            return;
         }
-    }
 
-    #[allow(dead_code)]
-    pub fn set(&mut self, value: T, shader: &ShaderSet) {
-        self.value = value;
-        self.direct_accept(shader);
-    }
-
-    fn direct_accept(&self, shader: &ShaderSet) {
         match shader.active() {
             Some(shader) if shader.id() == self.shader => {
                 self.value.accept(self.location);
@@ -110,7 +106,7 @@ pub struct SharedUniform<T>
 
 impl<T> SharedUniform<T>
     where
-        T: Accept,
+        T: Accept + PartialEq,
 {
     pub fn new<D>(value: T, shader_data: D) -> Result<Self, UniformError>
         where
@@ -134,6 +130,10 @@ impl<T> SharedUniform<T>
     }
 
     pub fn set_value(&mut self, value: T) {
+        if value == self.value {
+            return;
+        }
+
         self.value = value;
 
         for data in &self.data {
@@ -144,27 +144,14 @@ impl<T> SharedUniform<T>
     pub fn accept(&self, shader: &ShaderSet) {
         match shader.used() {
             Some(used) => {
-                if !self.data[used].accepted.get() {
-                    self.direct_accept(shader);
+                let data = &self.data[used];
+
+                if !data.accepted.get() {
+                    self.value.accept(data.location);
+                    data.accepted.set(true);
                 }
-            },
-            _ => panic!("Shader is not used!"),
-        }
-    }
-
-    #[allow(dead_code)]
-    pub fn set(&mut self, value: T, shader: &ShaderSet) {
-        self.value = value;
-        self.direct_accept(shader);
-    }
-
-    fn direct_accept(&self, shader: &ShaderSet) {
-        match shader.used() {
-            Some(used) => {
-                self.value.accept(self.data[used].location);
-                self.data[used].accepted.set(true);
             }
-            _ => panic!("Shader not used!"),
+            _ => panic!("Shader is not used!"),
         }
     }
 }

@@ -1,7 +1,6 @@
 use super::{
     super::Rect,
     Render,
-    UsedShader,
 };
 
 pub trait Draw {
@@ -16,7 +15,7 @@ impl<T> Draw for Rect<T>
         let rect: Rect<f32> = self.cast();
 
         render.unset_texture();
-        render.draw_rect(UsedShader::Base, rect);
+        render.draw_rect(rect);
     }
 }
 

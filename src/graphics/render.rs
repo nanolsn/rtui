@@ -125,15 +125,20 @@ impl Render {
         }
     }
 
-    pub fn draw_rect(&mut self, shader: UsedShader, rect: Rect<f32>) {
-        self.draw_rect_accept(shader, rect, None);
+    pub fn draw_rect(&mut self, rect: Rect<f32>) {
+        self.draw_rect_accept(UsedShader::Base, rect, None);
     }
 
-    pub fn draw_rect_st(&mut self, shader: UsedShader, rect: Rect<f32>, st: Rect<f32>) {
-        self.draw_rect_accept(shader, rect, Some(st));
+    #[allow(dead_code)]
+    pub fn draw_rect_st(&mut self, rect: Rect<f32>, st: Rect<f32>) {
+        self.draw_rect_accept(UsedShader::Base, rect, Some(st));
     }
 
-    fn draw_rect_accept(&mut self, shader: UsedShader, rect: Rect<f32>, st: Option<Rect<f32>>) {
+    pub(super) fn draw_rect_accept(&mut self,
+                                   shader: UsedShader,
+                                   rect: Rect<f32>,
+                                   st: Option<Rect<f32>>,
+    ) {
         self.shaders.use_shader(shader as usize);
 
         self.projection.accept(&self.shaders);

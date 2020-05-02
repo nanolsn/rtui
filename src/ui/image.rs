@@ -4,7 +4,6 @@ use crate::{
         Texture,
         Render,
         Draw,
-        UsedShader,
     },
 };
 
@@ -31,7 +30,7 @@ impl Draw for Image {
         let texture_size = self.texture.size().cast();
 
         render.set_texture(&self.texture);
-        render.draw_rect(UsedShader::Base, Rect::new(
+        render.draw_rect(Rect::new(
             render.size().half().cast::<f32>() - texture_size.half(),
             texture_size,
         ));
