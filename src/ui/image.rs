@@ -28,12 +28,10 @@ impl Image {
 
 impl Draw for Image {
     fn draw(&self, render: &mut Render) {
-        render.use_shader(UsedShader::Base);
-
         let texture_size = self.texture.size().cast();
 
         render.set_texture(&self.texture);
-        render.draw_rect(Rect::new(
+        render.draw_rect(UsedShader::Base, Rect::new(
             render.size().half().cast::<f32>() - texture_size.half(),
             texture_size,
         ));

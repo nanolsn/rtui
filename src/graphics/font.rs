@@ -1,10 +1,11 @@
 use super::{
-    texture::Texture,
-    render::Render,
     super::common::{
         Rect,
         Vec2D,
     },
+    Texture,
+    Render,
+    UsedShader,
 };
 
 #[derive(Debug)]
@@ -45,7 +46,7 @@ impl Font {
 
             let st_rect = Rect::new((s, t), (Font::S_CHAR, Font::T_CHAR));
 
-            render.draw_rect_st(char_rect, st_rect);
+            render.draw_rect_st(UsedShader::Font, char_rect, st_rect);
         }
     }
 

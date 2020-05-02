@@ -13,20 +13,15 @@ impl<T> Draw for Rect<T>
         T: num::NumCast + Copy,
 {
     fn draw(&self, render: &mut Render) {
-        render.use_shader(UsedShader::Base);
-
         let rect: Rect<f32> = self.cast();
 
         render.unset_texture();
-        render.draw_rect(rect);
+        render.draw_rect(UsedShader::Base, rect);
     }
 }
 
 impl Draw for &str {
-    fn draw(&self, render: &mut Render) {
-        render.use_shader(UsedShader::Font);
-        render.print(self);
-    }
+    fn draw(&self, render: &mut Render) { render.print(self) }
 }
 
 impl Draw for String {

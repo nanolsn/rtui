@@ -64,7 +64,7 @@ impl Render {
         shader_data.push((shaders.get_uniform(c_str!("projection")), UsedShader::Font as usize));
 
         let projection = SharedUniform::new(projection, shader_data).unwrap();
-        projection.accept(&mut shaders);
+        projection.accept(&shaders);
 
 
         let mut shader_data = vec![];
@@ -116,7 +116,7 @@ impl Render {
         self.size = size;
 
         let projection = Render::make_projection(size.cast::<f32>());
-        self.projection.set(projection, &mut self.shaders);
+        self.projection.set_value(projection);
     }
 
     pub fn clear(&self, color: Color) {
@@ -126,11 +126,31 @@ impl Render {
         }
     }
 
-    pub fn use_shader(&mut self, shader: UsedShader) { self.shaders.use_shader(shader as usize) }
+    fn use_shader(&mut self, shader: UsedShader) { self.shaders.use_shader(shader as usize) }
 
-    pub fn draw_rect(&self, rect: Rect<f32>) { self.rect_render.draw(rect, None) }
+    pub fn draw_rect(&mut self, shader: UsedShader, rect: Rect<f32>) {
+        self.use_shader(shader);
 
-    pub fn draw_rect_st(&self, rect: Rect<f32>, st: Rect<f32>) {
+        self.projection.accept(&self.shaders);
+        self.texture0.accept(&self.shaders);
+
+        if shader == UsedShader::Base {
+            self.base_data.draw_texture.accept(&self.shaders);
+        }
+
+        self.rect_render.draw(rect, None);
+    }
+
+    pub fn draw_rect_st(&mut self, shader: UsedShader, rect: Rect<f32>, st: Rect<f32>) {
+        self.use_shader(shader);
+
+        self.projection.accept(&self.shaders);
+        self.texture0.accept(&self.shaders);
+
+        if shader == UsedShader::Base {
+            self.base_data.draw_texture.accept(&self.shaders);
+        }
+
         self.rect_render.draw(rect, Some(st));
     }
 
@@ -142,21 +162,13 @@ impl Render {
     pub fn set_texture(&mut self, texture: &Texture) {
         const TEXTURE0_UNIT: i32 = 0;
 
-        let used = self.shaders.used();
-        self.texture0.set(TEXTURE0_UNIT, &mut self.shaders);
-        self.shaders.use_shader(used.unwrap());
-
+        self.texture0.set_value(TEXTURE0_UNIT);
         texture.bind(self.texture0.get() as u32);
 
-        // Ok, the hack:
-        if let Some(used) = self.shaders.used() {
-            if used == UsedShader::Base as usize {
-                self.base_data.draw_texture.set(true, &self.shaders);
-            }
-        }
+        self.base_data.draw_texture.set_value(true);
     }
 
-    pub fn unset_texture(&mut self) { self.base_data.draw_texture.set(false, &self.shaders) }
+    pub fn unset_texture(&mut self) { self.base_data.draw_texture.set_value(false) }
 
     pub fn print(&mut self, text: &str) {
         let font = Rc::clone(&self.font_render);

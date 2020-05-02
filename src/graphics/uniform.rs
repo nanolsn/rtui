@@ -94,6 +94,7 @@ impl<T> AsMut<T> for Uniform<T>
 pub struct UniformData {
     location: i32,
     shader_idx: usize,
+    accepted: std::cell::Cell<bool>,
 }
 
 #[derive(Debug)]
@@ -103,7 +104,6 @@ pub struct SharedUniform<T>
 {
     value: T,
     data: Vec<UniformData>,
-    accepted: std::cell::Cell<bool>,
 }
 
 impl<T> SharedUniform<T>
@@ -121,39 +121,45 @@ impl<T> SharedUniform<T>
             data.push(UniformData {
                 location,
                 shader_idx,
+                accepted: std::cell::Cell::new(false),
             });
         }
 
-        Ok(SharedUniform {
-            value,
-            data,
-            accepted: std::cell::Cell::new(false),
-        })
+        Ok(SharedUniform { value, data })
     }
 
     pub fn set_value(&mut self, value: T) {
         self.value = value;
-        self.accepted.set(false);
-    }
 
-    pub fn accept(&self, shader: &mut ShaderSet) {
-        if !self.accepted.get() {
-            self.direct_accept(shader);
+        for data in &self.data {
+            data.accepted.set(false);
         }
     }
 
-    pub fn set(&mut self, value: T, shader: &mut ShaderSet) {
+    pub fn accept(&self, shader: &ShaderSet) {
+        match shader.used() {
+            Some(used) => {
+                if !self.data[used].accepted.get() {
+                    self.direct_accept(shader);
+                }
+            },
+            _ => panic!("Shader is not used!"),
+        }
+    }
+
+    pub fn set(&mut self, value: T, shader: &ShaderSet) {
         self.value = value;
         self.direct_accept(shader);
     }
 
-    fn direct_accept(&self, shader: &mut ShaderSet) {
-        for data in self.data.iter() {
-            shader.use_shader(data.shader_idx);
-            self.value.accept(data.location);
+    fn direct_accept(&self, shader: &ShaderSet) {
+        match shader.used() {
+            Some(used) => {
+                self.value.accept(self.data[used].location);
+                self.data[used].accepted.set(true);
+            }
+            _ => panic!("Shader not used!"),
         }
-
-        self.accepted.set(true);
     }
 }
 
@@ -176,7 +182,10 @@ impl<T> AsMut<T> for SharedUniform<T>
         T: Accept,
 {
     fn as_mut(&mut self) -> &mut T {
-        self.accepted.set(false);
+        for data in &self.data {
+            data.accepted.set(false);
+        }
+
         &mut self.value
     }
 }

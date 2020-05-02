@@ -4,7 +4,7 @@ use super::{
     shaders::ShaderSet,
 };
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum UsedShader {
     Base = 0,
     Font = 1,
