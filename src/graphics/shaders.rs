@@ -172,7 +172,7 @@ impl ShaderSet {
         match self.used {
             Some(i) if i == idx => return,
             _ => {
-                unsafe { gl::UseProgram(self.shaders[idx].id) }
+                unsafe { ShaderSet::use_program(self.shaders[idx].id) }
                 self.used = Some(idx);
             }
         }
@@ -180,10 +180,12 @@ impl ShaderSet {
 
     pub fn unuse_shader(&mut self) {
         if self.used.is_some() {
-            unsafe { gl::UseProgram(0) };
+            unsafe { ShaderSet::use_program(0) }
             self.used = None;
         }
     }
+
+    unsafe fn use_program(id: u32) { gl::UseProgram(id) }
 
     pub fn accept<T>(&self, uniform: &Uniform<T>)
         where

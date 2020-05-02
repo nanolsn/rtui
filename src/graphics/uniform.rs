@@ -44,15 +44,6 @@ impl<T> Uniform<T>
         self.accepted.set(false);
     }
 
-    #[allow(dead_code)]
-    pub fn update_value<F>(&mut self, f: F)
-        where
-            F: FnOnce(&mut T),
-    {
-        f(&mut self.value);
-        self.accepted.set(false);
-    }
-
     pub fn accept(&self, shader: &ShaderSet) {
         if !self.accepted.get() {
             self.direct_accept(shader);
@@ -142,15 +133,6 @@ impl<T> SharedUniform<T>
 
     pub fn set_value(&mut self, value: T) {
         self.value = value;
-        self.accepted.set(false);
-    }
-
-    #[allow(dead_code)]
-    pub fn update_value<F>(&mut self, f: F)
-        where
-            F: FnOnce(&mut T),
-    {
-        f(&mut self.value);
         self.accepted.set(false);
     }
 

@@ -32,10 +32,7 @@ impl BaseData {
 
         shaders.accept(&col);
 
-        BaseData {
-            draw_texture,
-            col,
-        }
+        BaseData { draw_texture, col }
     }
 }
 
