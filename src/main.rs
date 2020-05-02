@@ -9,7 +9,7 @@ use ui::image::Image;
 fn main() {
     let window = Window::new("App", (600, 400));
 
-    let rect = Rect::new((20, 40), (80, 40));
+    let rect = Rect::new((30, 30), (80, 40));
     let img = Image::new("data/1.png", window.render());
     let hello = String::from("this repository understand your project by adding a README.");
 

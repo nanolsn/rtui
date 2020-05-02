@@ -50,6 +50,7 @@ impl<T> Uniform<T>
         }
     }
 
+    #[allow(dead_code)]
     pub fn set(&mut self, value: T, shader: &ShaderSet) {
         self.value = value;
         self.direct_accept(shader);
@@ -66,6 +67,7 @@ impl<T> Uniform<T>
     }
 }
 
+#[allow(dead_code)]
 impl<T> Uniform<T>
     where
         T: Copy + Accept,
@@ -110,10 +112,13 @@ impl<T> SharedUniform<T>
     where
         T: Accept,
 {
-    pub fn new(value: T, shader_data: Vec<(i32, usize)>) -> Result<Self, UniformError> {
+    pub fn new<D>(value: T, shader_data: D) -> Result<Self, UniformError>
+        where
+            D: IntoIterator<Item=(i32, usize)>,
+    {
         let mut data = vec![];
 
-        for (location, shader_idx) in shader_data {
+        for (location, shader_idx) in shader_data.into_iter() {
             if location < 0 {
                 return Err(UniformError::IncorrectLocation);
             }
@@ -147,6 +152,7 @@ impl<T> SharedUniform<T>
         }
     }
 
+    #[allow(dead_code)]
     pub fn set(&mut self, value: T, shader: &ShaderSet) {
         self.value = value;
         self.direct_accept(shader);

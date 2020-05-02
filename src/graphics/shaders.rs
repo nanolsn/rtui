@@ -2,6 +2,7 @@ use std::ffi::CStr;
 
 use super::{
     accept::Accept,
+    shader_data::UsedShader,
     uniform::{
         Uniform,
         UniformError,
@@ -172,7 +173,7 @@ impl ShaderSet {
         match self.used {
             Some(i) if i == idx => return,
             _ => {
-                unsafe { ShaderSet::use_program(self.shaders[idx].id) }
+                unsafe { ShaderSet::use_shader_unsafe(self.shaders[idx].id) }
                 self.used = Some(idx);
             }
         }
@@ -180,12 +181,12 @@ impl ShaderSet {
 
     pub fn unuse_shader(&mut self) {
         if self.used.is_some() {
-            unsafe { ShaderSet::use_program(0) }
+            unsafe { ShaderSet::use_shader_unsafe(0) }
             self.used = None;
         }
     }
 
-    unsafe fn use_program(id: u32) { gl::UseProgram(id) }
+    unsafe fn use_shader_unsafe(id: u32) { gl::UseProgram(id) }
 
     pub fn accept<T>(&self, uniform: &Uniform<T>)
         where
@@ -197,10 +198,31 @@ impl ShaderSet {
             T: AsRef<CStr>,
     {
         if let Some(shader) = self.active() {
-            unsafe { gl::GetUniformLocation(shader.id, name.as_ref().as_ptr()) }
+            unsafe { ShaderSet::get_uniform_unsafe(shader.id, name.as_ref()) }
         } else {
             panic!("Shader is not used!")
         }
+    }
+
+    pub fn get_shader_data<T, I>(&mut self, name: T, used_shaders: I) -> Vec<(i32, usize)>
+        where
+            T: AsRef<CStr>,
+            I: IntoIterator<Item=UsedShader>,
+    {
+        let mut shader_data = vec![];
+
+        for used_shader in used_shaders.into_iter().map(|u| u as usize) {
+            self.use_shader(used_shader);
+            let shader_id = self.shaders[used_shader].id;
+            let location = unsafe { ShaderSet::get_uniform_unsafe(shader_id, name.as_ref()) };
+            shader_data.push((location, used_shader));
+        }
+
+        shader_data
+    }
+
+    unsafe fn get_uniform_unsafe(shader_id: u32, name: &std::ffi::CStr) -> i32 {
+        gl::GetUniformLocation(shader_id, name.as_ptr())
     }
 
     pub fn make_uniform<T, S>(&self, value: T, name: S) -> Result<Uniform<T>, UniformError>

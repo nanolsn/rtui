@@ -57,21 +57,20 @@ impl Render {
             .into();
 
         let projection = Render::make_projection((w as f32, h as f32));
-        let mut shader_data = vec![];
-        shaders.use_shader(UsedShader::Base as usize);
-        shader_data.push((shaders.get_uniform(c_str!("projection")), UsedShader::Base as usize));
-        shaders.use_shader(UsedShader::Font as usize);
-        shader_data.push((shaders.get_uniform(c_str!("projection")), UsedShader::Font as usize));
+
+        let shader_data = shaders.get_shader_data(c_str!("projection"), vec![
+            UsedShader::Base,
+            UsedShader::Font,
+        ]);
 
         let projection = SharedUniform::new(projection, shader_data).unwrap();
-        projection.accept(&shaders);
 
 
-        let mut shader_data = vec![];
-        shaders.use_shader(UsedShader::Base as usize);
-        shader_data.push((shaders.get_uniform(c_str!("texture0")), UsedShader::Base as usize));
-        shaders.use_shader(UsedShader::Font as usize);
-        shader_data.push((shaders.get_uniform(c_str!("texture0")), UsedShader::Font as usize));
+        let shader_data = shaders.get_shader_data(c_str!("texture0"), vec![
+            UsedShader::Base,
+            UsedShader::Font,
+        ]);
+
         let texture0 = SharedUniform::new(0, shader_data).unwrap();
 
         Render {
@@ -126,23 +125,16 @@ impl Render {
         }
     }
 
-    fn use_shader(&mut self, shader: UsedShader) { self.shaders.use_shader(shader as usize) }
-
     pub fn draw_rect(&mut self, shader: UsedShader, rect: Rect<f32>) {
-        self.use_shader(shader);
-
-        self.projection.accept(&self.shaders);
-        self.texture0.accept(&self.shaders);
-
-        if shader == UsedShader::Base {
-            self.base_data.draw_texture.accept(&self.shaders);
-        }
-
-        self.rect_render.draw(rect, None);
+        self.draw_rect_accept(shader, rect, None);
     }
 
     pub fn draw_rect_st(&mut self, shader: UsedShader, rect: Rect<f32>, st: Rect<f32>) {
-        self.use_shader(shader);
+        self.draw_rect_accept(shader, rect, Some(st));
+    }
+
+    fn draw_rect_accept(&mut self, shader: UsedShader, rect: Rect<f32>, st: Option<Rect<f32>>) {
+        self.shaders.use_shader(shader as usize);
 
         self.projection.accept(&self.shaders);
         self.texture0.accept(&self.shaders);
@@ -151,7 +143,7 @@ impl Render {
             self.base_data.draw_texture.accept(&self.shaders);
         }
 
-        self.rect_render.draw(rect, Some(st));
+        self.rect_render.draw(rect, st);
     }
 
     pub fn draw<D>(&mut self, draw: &D)
