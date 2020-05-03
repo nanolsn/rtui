@@ -9,7 +9,7 @@ use super::{
     shaders::*,
     shader_data::*,
     rect_render::RectRender,
-    font::Font,
+    font_render::FontRender,
     texture::Texture,
     uniform::UniformError,
     Draw,
@@ -34,7 +34,7 @@ pub struct Render {
     shaders: ShaderSet,
     size: Vec2D<u32>,
     rect_render: RectRender,
-    font_render: Rc<Font>,
+    font_render: Rc<FontRender>,
     base_data: BaseData,
     shader_data: ShaderData,
 }
@@ -75,7 +75,7 @@ impl Render {
             shaders,
             size: (w, h).into(),
             rect_render: RectRender::new(0, 1),
-            font_render: Rc::new(Font::new()),
+            font_render: Rc::new(FontRender::new()),
             base_data,
             shader_data,
         })

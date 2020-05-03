@@ -3,7 +3,7 @@ mod macros;
 
 mod accept;
 mod draw;
-mod font;
+mod font_render;
 mod rect_render;
 mod render;
 mod shader_data;
