@@ -142,16 +142,17 @@ impl<T> SharedUniform<T>
     }
 
     pub fn accept(&self, shader: &ShaderSet) {
-        match shader.used() {
-            Some(used) => {
-                let data = &self.data[used];
+        let used = shader.used().expect("Shader is not used!");
 
+        for data in &self.data {
+            if data.shader_idx == used {
                 if !data.accepted.get() {
                     self.value.accept(data.location);
                     data.accepted.set(true);
                 }
+
+                break;
             }
-            _ => panic!("Shader is not used!"),
         }
     }
 }

@@ -38,7 +38,7 @@ pub struct ShaderData {
 
 impl ShaderData {
     pub fn new(shaders: &mut ShaderSet, projection: glm::Mat4) -> Result<Self, UniformError> {
-        let used_shaders = [UsedShader::Base, UsedShader::Font];
+        let used_shaders = [UsedShader::Font, UsedShader::Base];
 
         Ok(ShaderData {
             projection: shaders.make_shared(projection, c_str!("projection"), &used_shaders)?,

@@ -225,15 +225,15 @@ impl ShaderSet {
         let data = used_shaders
             .iter()
             .map(|&u| u as usize)
-            .map(move |used|
+            .map(move |shader_idx|
                 {
-                    self.use_shader(used);
-                    let shader_id = self.shaders[used].id;
+                    self.use_shader(shader_idx);
+                    let shader_id = self.shaders[shader_idx].id;
                     let location = unsafe {
                         ShaderSet::get_uniform_unsafe(shader_id, name.as_ref())
                     };
 
-                    (location, used)
+                    (location, shader_idx)
                 });
 
         Ok(SharedUniform::new(value, data)?)
