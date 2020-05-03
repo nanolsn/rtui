@@ -6,14 +6,28 @@ use super::{
         Rect,
         Vec2D,
     },
-    shaders::ShaderSet,
+    shaders::*,
     shader_data::*,
     rect_render::RectRender,
     font::Font,
     texture::Texture,
-    uniform::SharedUniform,
+    uniform::UniformError,
     Draw,
 };
+
+#[derive(Debug)]
+pub enum RenderError {
+    UniformError(UniformError),
+    ShaderError(ShaderError),
+}
+
+impl From<UniformError> for RenderError {
+    fn from(e: UniformError) -> Self { RenderError::UniformError(e) }
+}
+
+impl From<ShaderError> for RenderError {
+    fn from(e: ShaderError) -> Self { RenderError::ShaderError(e) }
+}
 
 #[derive(Debug)]
 pub struct Render {
@@ -22,16 +36,15 @@ pub struct Render {
     rect_render: RectRender,
     font_render: Rc<Font>,
     base_data: BaseData,
-    font_data: FontData,
-    projection: SharedUniform<glm::Mat4>,
-    texture0: SharedUniform<i32>,
+    shader_data: ShaderData,
 }
 
 impl Render {
-    pub fn new(context: &glutin::WindowedContext<glutin::PossiblyCurrent>) -> Self {
+    pub fn new(context: &glutin::WindowedContext<glutin::PossiblyCurrent>)
+        -> Result<Self, RenderError> {
         gl::load_with(|ptr| context.get_proc_address(ptr) as *const _);
 
-        Render::set_defaults();
+        unsafe { Render::set_defaults() }
 
         let mut shaders = ShaderSet::new();
 
@@ -39,16 +52,15 @@ impl Render {
         shaders.add(
             c_str!(include_str!("../shaders/vs.glsl")),
             c_str!(include_str!("../shaders/fs.glsl")),
-        ).unwrap();
+        )?;
 
         assert_eq!(shaders.len(), UsedShader::Font as usize);
         shaders.add(
             c_str!(include_str!("../shaders/vs.glsl")),
             c_str!(include_str!("../shaders/font_fs.glsl")),
-        ).unwrap();
+        )?;
 
-        let base_data = BaseData::new(&mut shaders);
-        let font_data = FontData::new(&mut shaders);
+        let base_data = BaseData::new(&mut shaders)?;
 
         let (w, h): (u32, u32) = context
             .window()
@@ -57,42 +69,24 @@ impl Render {
             .into();
 
         let projection = Render::make_projection((w as f32, h as f32));
+        let shader_data = ShaderData::new(&mut shaders, projection)?;
 
-        let shader_data = shaders.get_shader_data(c_str!("projection"), vec![
-            UsedShader::Base,
-            UsedShader::Font,
-        ]);
-
-        let projection = SharedUniform::new(projection, shader_data).unwrap();
-
-
-        let shader_data = shaders.get_shader_data(c_str!("texture0"), vec![
-            UsedShader::Base,
-            UsedShader::Font,
-        ]);
-
-        let texture0 = SharedUniform::new(0, shader_data).unwrap();
-
-        Render {
+        Ok(Render {
             shaders,
             size: (w, h).into(),
             rect_render: RectRender::new(0, 1),
             font_render: Rc::new(Font::new()),
             base_data,
-            font_data,
-            projection,
-            texture0,
-        }
+            shader_data,
+        })
     }
 
-    fn set_defaults() {
-        unsafe {
-            gl::Enable(gl::BLEND);
-            gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
+    unsafe fn set_defaults() {
+        gl::Enable(gl::BLEND);
+        gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
 
-            gl::Disable(gl::DEPTH_TEST);
-            gl::Disable(gl::CULL_FACE);
-        }
+        gl::Disable(gl::DEPTH_TEST);
+        gl::Disable(gl::CULL_FACE);
     }
 
     fn make_projection<S>(size: S) -> glm::Mat4
@@ -110,13 +104,15 @@ impl Render {
     pub fn size(&self) -> Vec2D<u32> { self.size }
 
     pub fn resize(&mut self, size: Vec2D<u32>) {
-        unsafe { gl::Viewport(0, 0, size.x as i32, size.y as i32) }
-
-        self.size = size;
+        unsafe { Render::resize_viewport(size.cast::<i32>()) }
 
         let projection = Render::make_projection(size.cast::<f32>());
-        self.projection.set_value(projection);
+        self.shader_data.projection.set_value(projection);
+
+        self.size = size;
     }
+
+    unsafe fn resize_viewport(size: Vec2D<i32>) { gl::Viewport(0, 0, size.x, size.y) }
 
     pub fn clear(&self, color: Color) {
         unsafe {
@@ -140,9 +136,7 @@ impl Render {
                                    st: Option<Rect<f32>>,
     ) {
         self.shaders.use_shader(shader as usize);
-
-        self.projection.accept(&self.shaders);
-        self.texture0.accept(&self.shaders);
+        self.shader_data.accept(&self.shaders);
 
         if shader == UsedShader::Base {
             self.base_data.draw_texture.accept(&self.shaders);
@@ -159,8 +153,8 @@ impl Render {
     pub fn set_texture(&mut self, texture: &Texture) {
         const TEXTURE0_UNIT: i32 = 0;
 
-        self.texture0.set_value(TEXTURE0_UNIT);
-        texture.bind(self.texture0.get() as u32);
+        self.shader_data.texture0.set_value(TEXTURE0_UNIT);
+        texture.bind(self.shader_data.texture0.get() as u32);
 
         self.base_data.draw_texture.set_value(true);
     }

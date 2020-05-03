@@ -8,6 +8,7 @@ use super::{
         UniformError,
     },
 };
+use crate::graphics::uniform::SharedUniform;
 
 const INFO_LOG_SIZE: usize = 512;
 
@@ -188,11 +189,6 @@ impl ShaderSet {
 
     unsafe fn use_shader_unsafe(id: u32) { gl::UseProgram(id) }
 
-    pub fn accept<T>(&self, uniform: &Uniform<T>)
-        where
-            T: Accept + PartialEq,
-    { uniform.accept(self) }
-
     pub fn get_uniform<T>(&self, name: T) -> i32
         where
             T: AsRef<CStr>,
@@ -204,30 +200,13 @@ impl ShaderSet {
         }
     }
 
-    pub fn get_shader_data<T, I>(&mut self, name: T, used_shaders: I) -> Vec<(i32, usize)>
-        where
-            T: AsRef<CStr>,
-            I: IntoIterator<Item=UsedShader>,
-    {
-        let mut shader_data = vec![];
-
-        for used_shader in used_shaders.into_iter().map(|u| u as usize) {
-            self.use_shader(used_shader);
-            let shader_id = self.shaders[used_shader].id;
-            let location = unsafe { ShaderSet::get_uniform_unsafe(shader_id, name.as_ref()) };
-            shader_data.push((location, used_shader));
-        }
-
-        shader_data
-    }
-
     unsafe fn get_uniform_unsafe(shader_id: u32, name: &std::ffi::CStr) -> i32 {
         gl::GetUniformLocation(shader_id, name.as_ptr())
     }
 
     pub fn make_uniform<T, S>(&self, value: T, name: S) -> Result<Uniform<T>, UniformError>
         where
-            T: Accept + PartialEq,
+            T: Accept,
             S: AsRef<CStr>
     {
         if let Some(shader) = self.active() {
@@ -235,6 +214,29 @@ impl ShaderSet {
         } else {
             panic!("Shader is not used!")
         }
+    }
+
+    pub fn make_shared<T, S>(&mut self, value: T, name: S, used_shaders: &[UsedShader])
+                             -> Result<SharedUniform<T>, UniformError>
+        where
+            T: Accept,
+            S: AsRef<CStr>
+    {
+        let data = used_shaders
+            .iter()
+            .map(|&u| u as usize)
+            .map(move |used|
+                {
+                    self.use_shader(used);
+                    let shader_id = self.shaders[used].id;
+                    let location = unsafe {
+                        ShaderSet::get_uniform_unsafe(shader_id, name.as_ref())
+                    };
+
+                    (location, used)
+                });
+
+        Ok(SharedUniform::new(value, data)?)
     }
 }
 

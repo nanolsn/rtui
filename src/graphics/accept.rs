@@ -1,4 +1,4 @@
-pub trait Accept {
+pub trait Accept: PartialEq {
     fn accept(&self, location: i32);
 }
 

@@ -24,7 +24,7 @@ pub struct Uniform<T>
 
 impl<T> Uniform<T>
     where
-        T: Accept + PartialEq,
+        T: Accept,
 {
     pub fn new(value: T, location: i32, shader: &ShaderProgram) -> Result<Self, UniformError> {
         if location < 0 {
@@ -106,7 +106,7 @@ pub struct SharedUniform<T>
 
 impl<T> SharedUniform<T>
     where
-        T: Accept + PartialEq,
+        T: Accept,
 {
     pub fn new<D>(value: T, shader_data: D) -> Result<Self, UniformError>
         where

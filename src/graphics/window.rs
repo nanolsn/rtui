@@ -8,7 +8,7 @@ use crate::{
 };
 
 pub struct Window {
-    pub(super) context: glutin::WindowedContext<glutin::PossiblyCurrent>,
+    context: glutin::WindowedContext<glutin::PossiblyCurrent>,
     event_loop: glutin::event_loop::EventLoop<()>,
     render: Render,
     root: Root,
@@ -37,7 +37,7 @@ impl Window {
             context.make_current().unwrap()
         };
 
-        let render = Render::new(&context);
+        let render = Render::new(&context).unwrap();
 
         let root = Root::new(Color::default());
 

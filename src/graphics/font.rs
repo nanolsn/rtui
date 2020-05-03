@@ -9,7 +9,7 @@ use super::{
 };
 
 #[derive(Debug)]
-pub(super) struct Font {
+pub struct Font {
     texture: Texture,
     char_width: u32,
     char_height: u32,
@@ -20,9 +20,9 @@ impl Font {
     const FONT_HEIGHT: u32 = 16;
     const S_CHAR: f32 = 1.0 / Font::FONT_WIDTH as f32;
     const T_CHAR: f32 = 1.0 / Font::FONT_HEIGHT as f32;
-    const INDENT: u32 = 1;
+    const INDENT: u32 = 0;
 
-    pub(super) fn new() -> Self {
+    pub fn new() -> Self {
         let texture = Texture::from_file("./data/font/0.png").unwrap();
         let char_width = texture.size().x / Font::FONT_WIDTH;
         let char_height = texture.size().y / Font::FONT_HEIGHT;
@@ -30,7 +30,7 @@ impl Font {
         Font { texture, char_width, char_height }
     }
 
-    pub(super) fn print(&self, render: &mut Render, text: &str, pos: Vec2D<f32>) {
+    pub fn print(&self, render: &mut Render, text: &str, pos: Vec2D<f32>) {
         render.set_texture(&self.texture);
 
         for (i, code) in text.chars().map(|c| c as u32).enumerate() {
@@ -50,7 +50,7 @@ impl Font {
         }
     }
 
-    pub(super) fn text_size(&self, text: &str) -> Vec2D<u32> {
+    pub fn text_size(&self, text: &str) -> Vec2D<u32> {
         match text.len() {
             0 => Vec2D::new(0, self.char_height),
             1 => Vec2D::new(self.char_width, self.char_height),

@@ -89,7 +89,7 @@ impl Texture {
         gl::GenerateMipmap(gl::TEXTURE_2D);
     }
 
-    pub(super) fn id(&self) -> u32 { self.id }
+    pub fn id(&self) -> u32 { self.id }
 
     pub fn bind(&self, unit: u32) {
         unsafe {

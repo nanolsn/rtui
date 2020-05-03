@@ -1,13 +1,13 @@
 use crate::common::Rect;
 
 #[derive(Debug)]
-pub(super) struct RectRender {
+pub struct RectRender {
     vao: u32,
     vbo: u32,
 }
 
 impl RectRender {
-    pub(super) fn new(pos_index: u32, st_index: u32) -> Self {
+    pub fn new(pos_index: u32, st_index: u32) -> Self {
         let (mut vbo, mut vao) = (0, 0);
 
         unsafe {
@@ -51,7 +51,7 @@ impl RectRender {
         RectRender { vao, vbo }
     }
 
-    pub(super) fn draw(&self, rect: Rect<f32>, st: Option<Rect<f32>>) {
+    pub fn draw(&self, rect: Rect<f32>, st: Option<Rect<f32>>) {
         let st = st.unwrap_or(Rect::new((0.0, 0.0), (1.0, 1.0)));
 
         let points: [glm::Vec4; 4] = [

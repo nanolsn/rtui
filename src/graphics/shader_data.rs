@@ -1,7 +1,11 @@
 use super::{
     super::common::Color,
-    uniform::Uniform,
     shaders::ShaderSet,
+    uniform::{
+        Uniform,
+        SharedUniform,
+        UniformError,
+    },
 };
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -11,46 +15,41 @@ pub enum UsedShader {
 }
 
 #[derive(Debug)]
-pub(super) struct BaseData {
-    pub(super) draw_texture: Uniform<bool>,
-    pub(super) col: Uniform<Color>,
+pub struct BaseData {
+    pub draw_texture: Uniform<bool>,
 }
 
 impl BaseData {
-    pub(super) fn new(shaders: &mut ShaderSet) -> Self {
+    pub fn new(shaders: &mut ShaderSet) -> Result<Self, UniformError> {
         shaders.use_shader(UsedShader::Base as usize);
 
-        let draw_texture = shaders
-            .make_uniform(false, c_str!("draw_texture"))
-            .unwrap();
-
-        shaders.accept(&draw_texture);
-
-        let col = shaders
-            .make_uniform(Color::white(), c_str!("col"))
-            .unwrap();
-
-        shaders.accept(&col);
-
-        BaseData { draw_texture, col }
+        Ok(BaseData {
+            draw_texture: shaders.make_uniform(false, c_str!("draw_texture"))?,
+        })
     }
 }
 
 #[derive(Debug)]
-pub(super) struct FontData {
-    pub(super) col: Uniform<Color>,
+pub struct ShaderData {
+    pub projection: SharedUniform<glm::Mat4>,
+    pub texture0: SharedUniform<i32>,
+    pub col: SharedUniform<Color>,
 }
 
-impl FontData {
-    pub(super) fn new(shaders: &mut ShaderSet) -> Self {
-        shaders.use_shader(UsedShader::Font as usize);
+impl ShaderData {
+    pub fn new(shaders: &mut ShaderSet, projection: glm::Mat4) -> Result<Self, UniformError> {
+        let used_shaders = [UsedShader::Base, UsedShader::Font];
 
-        let col = shaders
-            .make_uniform(Color::white(), c_str!("col"))
-            .unwrap();
+        Ok(ShaderData {
+            projection: shaders.make_shared(projection, c_str!("projection"), &used_shaders)?,
+            texture0: shaders.make_shared(0, c_str!("texture0"), &used_shaders)?,
+            col: shaders.make_shared(Color::white(), c_str!("col"), &used_shaders)?,
+        })
+    }
 
-        shaders.accept(&col);
-
-        FontData { col }
+    pub fn accept(&self, shader: &ShaderSet) {
+        self.projection.accept(&shader);
+        self.texture0.accept(&shader);
+        self.col.accept(&shader);
     }
 }
