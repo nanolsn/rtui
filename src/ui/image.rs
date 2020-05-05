@@ -4,6 +4,7 @@ use crate::{
         Texture,
         Render,
         Draw,
+        DrawParameters,
     },
 };
 
@@ -26,9 +27,10 @@ impl Image {
 }
 
 impl Draw for Image {
-    fn draw(&self, render: &mut Render) {
+    fn draw(&self, render: &mut Render, params: DrawParameters) {
         let texture_size = self.texture.size().cast();
 
+        render.set_color(params.color);
         render.set_texture(&self.texture);
         render.draw_rect(Rect::new(
             render.size().half().cast::<f32>() - texture_size.half(),

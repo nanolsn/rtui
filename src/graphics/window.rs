@@ -4,7 +4,7 @@ use crate::{
         Color,
         Vec2D,
     },
-    ui::root::Root,
+    ui::Root,
 };
 
 pub struct Window {

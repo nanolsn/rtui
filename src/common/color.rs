@@ -4,8 +4,10 @@ pub struct Color(pub f32, pub f32, pub f32, pub f32);
 #[allow(dead_code)]
 impl Color {
     pub fn black() -> Self { Color(0.0, 0.0, 0.0, 1.0) }
-
     pub fn white() -> Self { Color(1.0, 1.0, 1.0, 1.0) }
+    pub fn red() -> Self { Color(1.0, 0.0, 0.0, 1.0) }
+    pub fn green() -> Self { Color(0.0, 1.0, 0.0, 1.0) }
+    pub fn blue() -> Self { Color(0.0, 0.0, 1.0, 1.0) }
 
     pub fn rgb(r: f32, g: f32, b: f32) -> Self { Color(r, g, b, 1.0) }
 

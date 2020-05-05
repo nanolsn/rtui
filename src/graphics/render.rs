@@ -13,6 +13,7 @@ use super::{
     texture::Texture,
     uniform::UniformError,
     Draw,
+    DrawParameters,
 };
 
 #[derive(Debug)]
@@ -41,7 +42,7 @@ pub struct Render {
 
 impl Render {
     pub fn new(context: &glutin::WindowedContext<glutin::PossiblyCurrent>)
-        -> Result<Self, RenderError> {
+               -> Result<Self, RenderError> {
         gl::load_with(|ptr| context.get_proc_address(ptr) as *const _);
 
         unsafe { Render::set_defaults() }
@@ -148,7 +149,7 @@ impl Render {
     pub fn draw<D>(&mut self, draw: &D)
         where
             D: Draw,
-    { draw.draw(self) }
+    { draw.draw(self, DrawParameters::default()) }
 
     pub fn set_texture(&mut self, texture: &Texture) {
         const TEXTURE0_UNIT: i32 = 0;
@@ -169,4 +170,6 @@ impl Render {
 
         font.print(self, text, half - text_half);
     }
+
+    pub fn set_color(&mut self, color: Color) { self.shader_data.col.set_value(color) }
 }
