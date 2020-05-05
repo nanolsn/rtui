@@ -1,3 +1,5 @@
+use super::Rect;
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Default)]
 pub struct Vec2D<T> {
     pub x: T,
@@ -28,6 +30,12 @@ impl<T> Vec2D<T> {
     { self.try_cast().expect("Some value can't be represented by the target type") }
 
     pub fn into_inner(self) -> (T, T) { (self.x, self.y) }
+
+    pub fn into_rect<U>(self) -> Rect<U>
+        where
+            T: num::NumCast,
+            U: num::NumCast + num::Zero,
+    { Rect::new((U::zero(), U::zero()), self.cast()) }
 }
 
 impl<T> Vec2D<T>

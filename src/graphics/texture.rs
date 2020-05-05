@@ -19,8 +19,8 @@ impl From<ImageError> for TextureError {
 #[derive(Debug)]
 pub struct Texture {
     id: u32,
-    width: u32,
-    height: u32,
+    width: i32,
+    height: i32,
 }
 
 #[allow(dead_code)]
@@ -39,10 +39,10 @@ impl Texture {
     }
 
     pub fn new(img: DynamicImage) -> Result<Self, TextureError> {
-        let width = img.width();
-        let height = img.height();
+        let width = img.width() as i32;
+        let height = img.height() as i32;
 
-        if width == 0 || height == 0 {
+        if width <= 0 || height <= 0 {
             return Err(TextureError::EmptySize);
         }
 
@@ -64,8 +64,8 @@ impl Texture {
                 gl::TEXTURE_2D,
                 0,
                 format as i32,
-                width as i32,
-                height as i32,
+                width,
+                height,
                 0,
                 format,
                 gl::UNSIGNED_BYTE,
@@ -98,11 +98,11 @@ impl Texture {
         }
     }
 
-    pub fn width(&self) -> u32 { self.width }
+    pub fn width(&self) -> i32 { self.width }
 
-    pub fn height(&self) -> u32 { self.height }
+    pub fn height(&self) -> i32 { self.height }
 
-    pub fn size(&self) -> Vec2D<u32> { Vec2D::new(self.width, self.height) }
+    pub fn size(&self) -> Vec2D<i32> { Vec2D::new(self.width, self.height) }
 }
 
 impl Drop for Texture {

@@ -71,6 +71,34 @@ impl<T> Rect<T>
     pub fn top(&self) -> T { self.y + self.height }
 
     pub fn center(&self) -> Vec2D<T> { self.pos() + self.size().half() }
+
+    pub fn scale(&mut self, factor: T) {
+        self.width = self.width * factor;
+        self.height = self.height * factor;
+    }
+
+    pub fn scaled(mut self, factor: T) -> Self {
+        self.scale(factor);
+        self
+    }
+
+    pub fn translate<P>(&mut self, delta: P)
+        where
+            P: Into<Vec2D<T>>,
+    {
+        let delta = delta.into();
+
+        self.x = self.x + delta.x;
+        self.y = self.y + delta.y;
+    }
+
+    pub fn translated<P>(mut self, delta: P) -> Self
+        where
+            P: Into<Vec2D<T>>,
+    {
+        self.translate(delta);
+        self
+    }
 }
 
 #[allow(dead_code)]

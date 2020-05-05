@@ -23,12 +23,12 @@ impl FontRender {
                 Some(texture) => render.set_texture(texture),
             }
 
-            let char_rect = self.font.char_rect(n as u32, pos);
+            let char_rect = self.font.char_rect(n as i32, pos);
             let st_rect = self.font.st_rect(code);
 
             render.draw_rect_accept(UsedShader::Font, char_rect, Some(st_rect));
         }
     }
 
-    pub fn text_size(&self, text: &str) -> Vec2D<u32> { self.font.text_size(text) }
+    pub fn text_size(&self, text: &str) -> Vec2D<i32> { self.font.text_size(text) }
 }

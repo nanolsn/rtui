@@ -33,7 +33,7 @@ impl From<ShaderError> for RenderError {
 #[derive(Debug)]
 pub struct Render {
     shaders: ShaderSet,
-    size: Vec2D<u32>,
+    size: Vec2D<i32>,
     rect_render: RectRender,
     font_render: Rc<FontRender>,
     base_data: BaseData,
@@ -63,10 +63,10 @@ impl Render {
 
         let base_data = BaseData::new(&mut shaders)?;
 
-        let (w, h): (u32, u32) = context
+        let (w, h): (i32, i32) = context
             .window()
             .inner_size()
-            .to_logical::<u32>(context.window().scale_factor())
+            .to_logical::<i32>(context.window().scale_factor())
             .into();
 
         let projection = Render::make_projection((w as f32, h as f32));
@@ -102,10 +102,10 @@ impl Render {
     }
 
     #[allow(dead_code)]
-    pub fn size(&self) -> Vec2D<u32> { self.size }
+    pub fn size(&self) -> Vec2D<i32> { self.size }
 
-    pub fn resize(&mut self, size: Vec2D<u32>) {
-        unsafe { Render::resize_viewport(size.cast::<i32>()) }
+    pub fn resize(&mut self, size: Vec2D<i32>) {
+        unsafe { Render::resize_viewport(size) }
 
         let projection = Render::make_projection(size.cast::<f32>());
         self.shader_data.projection.set_value(projection);
@@ -165,10 +165,10 @@ impl Render {
     pub fn print(&mut self, text: &str) {
         let font = Rc::clone(&self.font_render);
 
-        let half = self.size.half().cast::<f32>();
-        let text_half = font.text_size(text).half().cast::<f32>();
+        let half = self.size.half();
+        let text_half = font.text_size(text).half();
 
-        font.print(self, text, half - text_half);
+        font.print(self, text, (half - text_half).cast());
     }
 
     pub fn set_color(&mut self, color: Color) { self.shader_data.col.set_value(color) }

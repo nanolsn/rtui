@@ -4,14 +4,14 @@ mod ui;
 
 use common::Rect;
 use graphics::Window;
-use ui::{Image, Color};
+use ui::{Image, Col, Pos};
 
 fn main() {
     let window = Window::new("App", (600, 400));
 
-    let rect = Color::red(Rect::new((30, 30), (80, 40)));
-    let img = Image::new("data/1.png", window.render());
-    let hello = Color::green("by adding the КАПС README.!@#$%^&* Привет, мир ЪЁь!1230");
+    let rect = Col::red(Rect::new((30, 30), (80, 40)));
+    let img = Pos::left(Image::new("data/1.png", window.render()), 20);
+    let hello = Col::green("by adding the КАПС README.!@#$%^&* Привет, мир ЪЁь!1230");
 
     window.run(move |render| {
         render.draw(&rect);

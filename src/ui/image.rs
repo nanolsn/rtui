@@ -1,11 +1,8 @@
-use crate::{
-    common::Rect,
-    graphics::{
-        Texture,
-        Render,
-        Draw,
-        DrawParameters,
-    },
+use crate::graphics::{
+    Texture,
+    Render,
+    Draw,
+    DrawParameters,
 };
 
 #[derive(Debug)]
@@ -28,13 +25,13 @@ impl Image {
 
 impl Draw for Image {
     fn draw(&self, render: &mut Render, params: DrawParameters) {
-        let texture_size = self.texture.size().cast();
+        let rect = params.position.rect(
+            render.size().into_rect(),
+            self.texture.size(),
+        );
 
         render.set_color(params.color);
         render.set_texture(&self.texture);
-        render.draw_rect(Rect::new(
-            render.size().half().cast::<f32>() - texture_size.half(),
-            texture_size,
-        ));
+        render.draw_rect(rect.cast());
     }
 }
