@@ -11,7 +11,7 @@ fn main() {
 
     let rect = Rect::new((30, 30), (80, 40));
     let img = Image::new("data/1.png", window.render());
-    let hello = String::from("this repository understand your project by adding a README.");
+    let hello = String::from("by adding the fucking README.!@#$%^&* Привет, мир ЪЁь!1230");
 
     window.run(move |render| {
         render.draw(&rect);

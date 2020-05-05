@@ -41,7 +41,10 @@ impl<T> Pages<T> {
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_or_first(&self, idx: usize) -> &T { self.get(idx).unwrap_or(&self.first) }
+
+    pub fn first(&self) -> &T { &self.first }
 }
 
 #[cfg(test)]

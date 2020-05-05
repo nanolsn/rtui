@@ -26,6 +26,8 @@ impl<T> Vec2D<T> {
             T: num::NumCast,
             U: num::NumCast,
     { self.try_cast().expect("Some value can't be represented by the target type") }
+
+    pub fn into_inner(self) -> (T, T) { (self.x, self.y) }
 }
 
 impl<T> Vec2D<T>
