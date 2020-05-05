@@ -25,6 +25,27 @@ pub trait Draw {
     fn draw(&self, render: &mut Render, params: DrawParameters);
 }
 
+impl<T> Draw for &T
+    where
+        T: Draw,
+{
+    fn draw(&self, render: &mut Render, params: DrawParameters) { (**self).draw(render, params) }
+}
+
+impl<T> Draw for &mut T
+    where
+        T: Draw,
+{
+    fn draw(&self, render: &mut Render, params: DrawParameters) { (**self).draw(render, params) }
+}
+
+impl<T> Draw for Box<T>
+    where
+        T: Draw,
+{
+    fn draw(&self, render: &mut Render, params: DrawParameters) { (**self).draw(render, params) }
+}
+
 impl<T> Draw for Rect<T>
     where
         T: num::NumCast + Copy,
@@ -39,7 +60,13 @@ impl<T> Draw for Rect<T>
 impl Draw for &str {
     fn draw(&self, render: &mut Render, params: DrawParameters) {
         render.set_color(params.color);
-        render.print(self);
+
+        let pos = params.position.rect(
+            render.size().into_rect(),
+            render.font().text_size(self),
+        ).pos();
+
+        render.print(self, pos);
     }
 }
 

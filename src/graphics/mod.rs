@@ -16,6 +16,5 @@ mod window;
 
 pub use draw::{Draw, DrawParameters};
 pub use render::Render;
-pub use shader_data::UsedShader;
 pub use texture::{Texture, TextureError};
 pub use window::Window;

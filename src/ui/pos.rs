@@ -18,13 +18,13 @@ impl<U> Pos<U>
     where
         U: Draw,
 {
-    pub fn new(ui: U, position: Position) -> Self { Pos { ui, position } }
+    pub fn new(position: Position, ui: U) -> Self { Pos { position, ui } }
 
-    pub fn center(ui: U) -> Self { Pos::new(ui, Position::Center) }
-    pub fn left(ui: U, pad: i32) -> Self { Pos::new(ui, Position::Left(pad)) }
-    pub fn right(ui: U, pad: i32) -> Self { Pos::new(ui, Position::Right(pad)) }
-    pub fn bot(ui: U, pad: i32) -> Self { Pos::new(ui, Position::Bot(pad)) }
-    pub fn top(ui: U, pad: i32) -> Self { Pos::new(ui, Position::Top(pad)) }
+    pub fn center(ui: U) -> Self { Pos::new(Position::Center, ui) }
+    pub fn left(pad: i32, ui: U) -> Self { Pos::new(Position::Left(pad), ui) }
+    pub fn right(pad: i32, ui: U) -> Self { Pos::new(Position::Right(pad), ui) }
+    pub fn bot(pad: i32, ui: U) -> Self { Pos::new(Position::Bot(pad), ui) }
+    pub fn top(pad: i32, ui: U) -> Self { Pos::new(Position::Top(pad), ui) }
 }
 
 impl<U> Draw for Pos<U>

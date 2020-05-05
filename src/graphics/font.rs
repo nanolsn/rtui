@@ -14,11 +14,12 @@ pub struct Font {
     pub char_size: Vec2D<i32>,
     pub st_char: Vec2D<f32>,
     pub indent: i32,
+    pub line_spacing: i32,
     pub pages: Pages<Texture>,
 }
 
 impl Font {
-    pub fn new<S>(atlas_size: S, indent: i32, pages: Pages<Texture>) -> Self
+    pub fn new<S>(atlas_size: S, indent: i32, line_spacing: i32, pages: Pages<Texture>) -> Self
         where
             S: Into<Vec2D<i32>>,
     {
@@ -34,6 +35,7 @@ impl Font {
             char_size: Vec2D::new(char_width, char_height),
             st_char: Vec2D::new(1.0 / atlas_size.x as f32, 1.0 / atlas_size.y as f32),
             indent,
+            line_spacing,
             pages,
         }
     }
@@ -75,6 +77,6 @@ impl Default for Font {
         let mut pages = Pages::new(p0);
         pages.add(p4, 4);
 
-        Font::new((16, 16), 0, pages)
+        Font::new((16, 16), 0, 1, pages)
     }
 }

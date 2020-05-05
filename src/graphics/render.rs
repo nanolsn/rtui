@@ -10,6 +10,7 @@ use super::{
     shader_data::*,
     rect_render::RectRender,
     font_render::FontRender,
+    font::Font,
     texture::Texture,
     uniform::UniformError,
     Draw,
@@ -162,14 +163,13 @@ impl Render {
 
     pub fn unset_texture(&mut self) { self.base_data.draw_texture.set_value(false) }
 
-    pub fn print(&mut self, text: &str) {
+    pub fn print(&mut self, text: &str, pos: Vec2D<i32>) {
         let font = Rc::clone(&self.font_render);
 
-        let half = self.size.half();
-        let text_half = font.text_size(text).half();
-
-        font.print(self, text, (half - text_half).cast());
+        font.print(self, text, pos.cast());
     }
 
     pub fn set_color(&mut self, color: Color) { self.shader_data.col.set_value(color) }
+
+    pub fn font(&self) -> &Font { self.font_render.font() }
 }

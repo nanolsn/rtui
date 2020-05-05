@@ -1,4 +1,4 @@
-use image::{
+use im::{
     GenericImageView,
     DynamicImage,
     ImageError,
@@ -26,7 +26,7 @@ pub struct Texture {
 #[allow(dead_code)]
 impl Texture {
     pub fn from_size((width, height): (u32, u32)) -> Result<Self, TextureError> {
-        let img = image::DynamicImage::new_rgba8(width, height);
+        let img = im::DynamicImage::new_rgba8(width, height);
         Texture::new(img)
     }
 
@@ -34,7 +34,7 @@ impl Texture {
         where
             S: AsRef<str>,
     {
-        let img = image::open(file.as_ref())?;
+        let img = im::open(file.as_ref())?;
         Texture::new(img)
     }
 

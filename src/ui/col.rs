@@ -18,13 +18,13 @@ impl<U> Col<U>
     where
         U: Draw,
 {
-    pub fn new(ui: U, color: Color) -> Self { Col { ui, color } }
+    pub fn new(color: Color, ui: U) -> Self { Col { color, ui } }
 
-    pub fn black(ui: U) -> Self { Col::new(ui, Color::black()) }
-    pub fn white(ui: U) -> Self { Col::new(ui, Color::white()) }
-    pub fn red(ui: U) -> Self { Col::new(ui, Color::red()) }
-    pub fn green(ui: U) -> Self { Col::new(ui, Color::green()) }
-    pub fn blue(ui: U) -> Self { Col::new(ui, Color::blue()) }
+    pub fn black(ui: U) -> Self { Col::new(Color::black(), ui) }
+    pub fn white(ui: U) -> Self { Col::new(Color::white(), ui) }
+    pub fn red(ui: U) -> Self { Col::new(Color::red(), ui) }
+    pub fn green(ui: U) -> Self { Col::new(Color::green(), ui) }
+    pub fn blue(ui: U) -> Self { Col::new(Color::blue(), ui) }
 }
 
 impl<U> Draw for Col<U>

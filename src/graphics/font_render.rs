@@ -1,8 +1,8 @@
 use super::{
     super::common::Vec2D,
-    Render,
-    UsedShader,
+    shader_data::UsedShader,
     font::Font,
+    Render,
 };
 
 #[derive(Debug)]
@@ -30,5 +30,5 @@ impl FontRender {
         }
     }
 
-    pub fn text_size(&self, text: &str) -> Vec2D<i32> { self.font.text_size(text) }
+    pub fn font(&self) -> &Font { &self.font }
 }
