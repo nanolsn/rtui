@@ -25,6 +25,11 @@ impl<U> Pos<U>
     pub fn right(pad: i32, ui: U) -> Self { Pos::new(Position::Right(pad), ui) }
     pub fn bot(pad: i32, ui: U) -> Self { Pos::new(Position::Bot(pad), ui) }
     pub fn top(pad: i32, ui: U) -> Self { Pos::new(Position::Top(pad), ui) }
+
+    pub fn left_bot(l: i32, b: i32, ui: U) -> Self { Pos::new(Position::LeftBot(l, b), ui) }
+    pub fn left_top(l: i32, t: i32, ui: U) -> Self { Pos::new(Position::LeftTop(l, t), ui) }
+    pub fn right_bot(r: i32, b: i32, ui: U) -> Self { Pos::new(Position::RightBot(r, b), ui) }
+    pub fn right_top(r: i32, t: i32, ui: U) -> Self { Pos::new(Position::RightTop(r, t), ui) }
 }
 
 impl<U> Draw for Pos<U>

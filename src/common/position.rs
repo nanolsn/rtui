@@ -10,6 +10,10 @@ pub enum Position {
     Right(i32),
     Bot(i32),
     Top(i32),
+    LeftBot(i32, i32),
+    LeftTop(i32, i32),
+    RightBot(i32, i32),
+    RightTop(i32, i32),
 }
 
 impl Position {
@@ -30,6 +34,13 @@ impl Position {
             Position::Top(pad) => Vec2D::new(
                 frame.width / 2 - size.x / 2,
                 frame.height - size.y - pad,
+            ),
+            Position::LeftBot(l, b) => Vec2D::new(l, b),
+            Position::LeftTop(l, t) => Vec2D::new(l, frame.height - size.y - t),
+            Position::RightBot(r, b) => Vec2D::new(frame.width - size.x - r, b),
+            Position::RightTop(r, t) => Vec2D::new(
+                frame.width - size.x - r,
+                frame.height - size.y - t,
             ),
         };
 

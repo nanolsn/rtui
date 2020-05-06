@@ -4,14 +4,13 @@ use crate::{
         Color,
         Vec2D,
     },
-    ui::Root,
 };
 
 pub struct Window {
     context: glutin::WindowedContext<glutin::PossiblyCurrent>,
     event_loop: glutin::event_loop::EventLoop<()>,
     render: Render,
-    root: Root,
+    bg: Color,
 }
 
 impl Window {
@@ -39,13 +38,11 @@ impl Window {
 
         let render = Render::new(&context).unwrap();
 
-        let root = Root::new(Color::default());
-
         Window {
             context,
             event_loop,
             render,
-            root,
+            bg: Color::default(),
         }
     }
 
@@ -53,7 +50,7 @@ impl Window {
 
     #[allow(dead_code)]
     pub fn with_bg(&mut self, color: Color) -> &mut Self {
-        self.root.bg = color;
+        self.bg = color;
         self
     }
 
@@ -64,7 +61,7 @@ impl Window {
         let mut render = self.render;
         let mut focused = true;
         let context = self.context;
-        let root = self.root;
+        let bg = self.bg;
 
         self.event_loop.run(move |event, _, control_flow| {
             use glutin::{
@@ -88,7 +85,7 @@ impl Window {
                 Event::NewEvents(StartCause::Poll) => {
                     if !focused { return; }
 
-                    render.clear(root.bg);
+                    render.clear(bg);
 
                     f(&mut render);
 
