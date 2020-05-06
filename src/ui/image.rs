@@ -25,10 +25,7 @@ impl Image {
 
 impl Draw for Image {
     fn draw(&self, render: &mut Render, params: DrawParameters) {
-        let rect = params.position.rect(
-            render.size().into_rect(),
-            self.texture.size(),
-        );
+        let rect = params.render_rect(self.texture.size());
 
         render.set_color(params.color);
         render.set_texture(&self.texture);

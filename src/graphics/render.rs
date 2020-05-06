@@ -143,7 +143,13 @@ impl Render {
     pub fn draw<D>(&mut self, draw: &D)
         where
             D: Draw,
-    { draw.draw(self, DrawParameters::default()) }
+    {
+        draw.draw(self, DrawParameters {
+            color: Color::white(),
+            position: Position::default(),
+            frame: self.size.into_rect(),
+        })
+    }
 
     pub fn set_texture(&mut self, texture: &Texture) {
         const TEXTURE0_UNIT: i32 = 0;
@@ -156,14 +162,11 @@ impl Render {
 
     pub fn unset_texture(&mut self) { self.base_data.draw_texture.set_value(false) }
 
-    pub fn print(&mut self, text: &str, position: Position) {
+    pub fn print(&mut self, text: &str, params: &DrawParameters) {
         let mut font = self.font_render.take().unwrap();
 
         let glyphs = font.glyphs(text);
-        let pos = position.rect(
-            self.size().into_rect(),
-            glyphs.size(),
-        ).pos();
+        let pos = params.render_rect(glyphs.size()).pos();
 
         font.print(self, glyphs.into_inner(), pos.cast());
 

@@ -5,9 +5,9 @@ use super::{
         Vec2D,
         Rect,
     },
+    glyphs::*,
     pages::Pages,
     Texture,
-    glyphs::*,
 };
 
 #[derive(Copy, Clone, Debug)]
@@ -135,9 +135,22 @@ impl Default for Font {
         glyph_widths.insert(';', GlyphSize::new(2, 4));
         glyph_widths.insert('.', GlyphSize::new(2, 4));
         glyph_widths.insert(',', GlyphSize::new(2, 4));
+        glyph_widths.insert('`', GlyphSize::new(0, 6));
         glyph_widths.insert('|', GlyphSize::new(2, 4));
         glyph_widths.insert('i', GlyphSize::new(0, 6));
         glyph_widths.insert('j', GlyphSize::new(0, 6));
+        glyph_widths.insert('l', GlyphSize::new(0, 6));
+        glyph_widths.insert('M', GlyphSize::new(0, 9));
+        glyph_widths.insert('m', GlyphSize::new(-1, 9));
+        glyph_widths.insert('W', GlyphSize::new(0, 9));
+        glyph_widths.insert('w', GlyphSize::new(0, 9));
+
+        glyph_widths.insert('М', GlyphSize::new(0, 9));
+        glyph_widths.insert('м', GlyphSize::new(0, 9));
+        glyph_widths.insert('Ы', GlyphSize::new(0, 9));
+        glyph_widths.insert('ы', GlyphSize::new(0, 9));
+        glyph_widths.insert('Ю', GlyphSize::new(0, 9));
+        glyph_widths.insert('ю', GlyphSize::new(0, 9));
 
         Font::new((16, 16), 0, 1, pages, glyph_widths)
     }

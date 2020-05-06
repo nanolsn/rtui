@@ -3,6 +3,7 @@ use super::{
         Rect,
         Color,
         Position,
+        Vec2D,
     },
     Render,
 };
@@ -10,15 +11,14 @@ use super::{
 pub struct DrawParameters {
     pub color: Color,
     pub position: Position,
+    pub frame: Rect<i32>,
 }
 
-impl Default for DrawParameters {
-    fn default() -> Self {
-        DrawParameters {
-            color: Color::white(),
-            position: Position::default(),
-        }
-    }
+impl DrawParameters {
+    pub fn render_rect<S>(&self, size: S) -> Rect<i32>
+        where
+            S: Into<Vec2D<i32>>,
+    { self.position.rect(self.frame, size) }
 }
 
 pub trait Draw {
@@ -60,7 +60,7 @@ impl<T> Draw for Rect<T>
 impl Draw for &str {
     fn draw(&self, render: &mut Render, params: DrawParameters) {
         render.set_color(params.color);
-        render.print(self, params.position);
+        render.print(self, &params);
     }
 }
 
