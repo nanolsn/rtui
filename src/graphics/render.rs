@@ -1,16 +1,9 @@
-use std::rc::Rc;
-
 use super::{
-    super::common::{
-        Color,
-        Rect,
-        Vec2D,
-    },
+    super::common::*,
     shaders::*,
     shader_data::*,
     rect_render::RectRender,
     font_render::FontRender,
-    font::Font,
     texture::Texture,
     uniform::UniformError,
     Draw,
@@ -36,7 +29,7 @@ pub struct Render {
     shaders: ShaderSet,
     size: Vec2D<i32>,
     rect_render: RectRender,
-    font_render: Rc<FontRender>,
+    font_render: Option<FontRender>,
     base_data: BaseData,
     shader_data: ShaderData,
 }
@@ -77,7 +70,7 @@ impl Render {
             shaders,
             size: (w, h).into(),
             rect_render: RectRender::new(0, 1),
-            font_render: Rc::new(FontRender::new()),
+            font_render: Some(FontRender::new()),
             base_data,
             shader_data,
         })
@@ -163,13 +156,19 @@ impl Render {
 
     pub fn unset_texture(&mut self) { self.base_data.draw_texture.set_value(false) }
 
-    pub fn print(&mut self, text: &str, pos: Vec2D<i32>) {
-        let font = Rc::clone(&self.font_render);
+    pub fn print(&mut self, text: &str, position: Position) {
+        let mut font = self.font_render.take().unwrap();
 
-        font.print(self, text, pos.cast());
+        let glyphs = font.glyphs(text);
+        let pos = position.rect(
+            self.size().into_rect(),
+            glyphs.size(),
+        ).pos();
+
+        font.print(self, glyphs.into_inner(), pos.cast());
+
+        self.font_render = Some(font);
     }
 
     pub fn set_color(&mut self, color: Color) { self.shader_data.col.set_value(color) }
-
-    pub fn font(&self) -> &Font { self.font_render.font() }
 }

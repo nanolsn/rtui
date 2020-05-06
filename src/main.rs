@@ -11,11 +11,15 @@ fn main() {
 
     let rect = Col::red(Rect::new((30, 30), (80, 40)));
     let img = Pos::right_bot(30, 10, Image::new("data/1.png", window.render()));
-    let hello = Col::green("by adding the КАПС README.!@#$%^&* Привет, мир ЪЁь!1230");
+    let text = Col::green("jie adding the КАПС README.,!:;|*@ Привет, мир ЪЁь!1230");
+    let hello = Col::blue("Hello, world!");
+    let cyr = Pos::right(0, Col::red("жэьмъйы"));
 
     window.run(move |render| {
         render.draw(&rect);
         render.draw(&img);
-        render.draw(&Pos::right(4, &hello));
+        render.draw(&Pos::left_top(0, 0, &text));
+        render.draw(&hello);
+        render.draw(&cyr);
     });
 }

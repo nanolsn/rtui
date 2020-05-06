@@ -60,13 +60,7 @@ impl<T> Draw for Rect<T>
 impl Draw for &str {
     fn draw(&self, render: &mut Render, params: DrawParameters) {
         render.set_color(params.color);
-
-        let pos = params.position.rect(
-            render.size().into_rect(),
-            render.font().text_size(self),
-        ).pos();
-
-        render.print(self, pos);
+        render.print(self, params.position);
     }
 }
 

@@ -40,6 +40,14 @@ impl<T> Vec2D<T> {
 
 impl<T> Vec2D<T>
     where
+        T: Copy,
+{
+    pub fn width(&self) -> T { self.x }
+    pub fn height(&self) -> T { self.y }
+}
+
+impl<T> Vec2D<T>
+    where
         T: Copy + num::Num,
 {
     pub fn half(self) -> Vec2D<T> { self / (T::one() + T::one()) }

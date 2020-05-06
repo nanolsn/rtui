@@ -2,33 +2,37 @@ use super::{
     super::common::Vec2D,
     shader_data::UsedShader,
     font::Font,
+    glyphs::*,
     Render,
 };
 
 #[derive(Debug)]
 pub struct FontRender {
     font: Font,
+    buf: Option<Vec<Glyph>>,
 }
 
 impl FontRender {
     pub fn new() -> Self {
         let font = Font::default();
-        FontRender { font }
+        FontRender { font, buf: Some(Vec::new()) }
     }
 
-    pub fn print(&self, render: &mut Render, text: &str, pos: Vec2D<f32>) {
-        for (n, code) in text.chars().map(|c| c as u32).enumerate() {
-            match self.font.page(code) {
+    pub fn print(&mut self, render: &mut Render, mut glyphs: Vec<Glyph>, pos: Vec2D<f32>) {
+        for glyph in glyphs.drain(..) {
+            match self.font.page(glyph.code) {
                 None => continue,
                 Some(texture) => render.set_texture(texture),
             }
 
-            let char_rect = self.font.char_rect(n as i32, pos);
-            let st_rect = self.font.st_rect(code);
-
-            render.draw_rect_accept(UsedShader::Font, char_rect, Some(st_rect));
+            let (placing, st_map) = self.font.render_rect(glyph, pos);
+            render.draw_rect_accept(UsedShader::Font, placing, Some(st_map));
         }
+
+        self.buf = Some(glyphs);
     }
 
-    pub fn font(&self) -> &Font { &self.font }
+    pub fn glyphs(&mut self, text: &str) -> Glyphs {
+        self.font.glyphs(text, self.buf.take().unwrap())
+    }
 }
