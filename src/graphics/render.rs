@@ -45,13 +45,13 @@ impl Render {
 
         assert_eq!(shaders.len(), UsedShader::Base as usize);
         shaders.add(
-            c_str!(include_str!("../shaders/vs.glsl")),
-            c_str!(include_str!("../shaders/fs.glsl")),
+            c_str!(include_str!("../shaders/ui_vs.glsl")),
+            c_str!(include_str!("../shaders/ui_fs.glsl")),
         )?;
 
         assert_eq!(shaders.len(), UsedShader::Font as usize);
         shaders.add(
-            c_str!(include_str!("../shaders/vs.glsl")),
+            c_str!(include_str!("../shaders/ui_vs.glsl")),
             c_str!(include_str!("../shaders/font_fs.glsl")),
         )?;
 
