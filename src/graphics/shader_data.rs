@@ -12,6 +12,7 @@ use super::{
 pub enum UsedShader {
     Base = 0,
     Font = 1,
+    Post = 2,
 }
 
 #[derive(Debug)]
@@ -25,6 +26,21 @@ impl BaseData {
 
         Ok(BaseData {
             draw_texture: shaders.make_uniform(false, c_str!("draw_texture"))?,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct PostData {
+    pub frame: Uniform<i32>,
+}
+
+impl PostData {
+    pub fn new(shaders: &mut ShaderSet) -> Result<Self, UniformError> {
+        shaders.use_shader(UsedShader::Post as usize);
+
+        Ok(PostData {
+            frame: shaders.make_uniform(0, c_str!("frame"))?,
         })
     }
 }

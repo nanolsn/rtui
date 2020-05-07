@@ -39,6 +39,7 @@ pub struct Render {
     rect_render: RectRender,
     font_render: Option<FontRender>,
     base_data: BaseData,
+    post_data: PostData,
     shader_data: ShaderData,
 }
 
@@ -47,7 +48,7 @@ impl Render {
                -> Result<Self, RenderError> {
         gl::load_with(|ptr| context.get_proc_address(ptr) as *const _);
 
-        unsafe { Render::set_defaults() }
+        unsafe { Render::set_defaults() };
 
         let mut shaders = Render::make_shader_set()?;
 
@@ -59,12 +60,13 @@ impl Render {
 
         let projection = Render::make_ortho((w as f32, h as f32));
         let base_data = BaseData::new(&mut shaders)?;
+        let post_data = PostData::new(&mut shaders)?;
         let shader_data = ShaderData::new(&mut shaders, projection)?;
 
         let mut framebuffers = FramebufferSet::new();
-        framebuffers.add_framebuffer();
-        framebuffers.add_texture((w, h), TextureFormat::RGB)?;
-        framebuffers.add_renderbuffer((w, h), RenderbufferFormat::Depth24)?;
+        framebuffers.add_framebuffer((w, h));
+        framebuffers.add_texture(TextureFormat::RGB)?;
+        framebuffers.add_renderbuffer(RenderbufferFormat::Depth24)?;
         framebuffers.bind_default();
 
         Ok(Render {
@@ -74,6 +76,7 @@ impl Render {
             rect_render: RectRender::new(0, 1),
             font_render: Some(FontRender::new()),
             base_data,
+            post_data,
             shader_data,
         })
     }
@@ -99,6 +102,12 @@ impl Render {
         shaders.add(
             c_str!(include_str!("../shaders/ui_vs.glsl")),
             c_str!(include_str!("../shaders/font_fs.glsl")),
+        )?;
+
+        assert_eq!(shaders.len(), UsedShader::Post as usize);
+        shaders.add(
+            c_str!(include_str!("../shaders/post_vs.glsl")),
+            c_str!(include_str!("../shaders/post_fs.glsl")),
         )?;
 
         Ok(shaders)
@@ -153,6 +162,10 @@ impl Render {
 
         if shader == UsedShader::Base {
             self.base_data.draw_texture.accept(&self.shaders);
+        }
+
+        if shader == UsedShader::Post {
+            self.post_data.frame.accept(&self.shaders);
         }
 
         self.rect_render.draw(rect, st);

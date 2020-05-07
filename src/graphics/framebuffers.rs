@@ -31,6 +31,7 @@ pub struct Framebuffer {
     id: u32,
     renderbuffer: Option<Renderbuffer>,
     textures: Vec<Texture>,
+    size: Vec2d<i32>,
 }
 
 impl Framebuffer {
@@ -38,7 +39,7 @@ impl Framebuffer {
     ///
     /// This function is unsafe, because a `Framebuffer` needs to be properly deleted,
     /// but it doesn't implement `Drop`.
-    unsafe fn new() -> Self {
+    unsafe fn new(size: Vec2d<i32>) -> Self {
         let mut id = 0;
         gl::GenFramebuffers(1, &mut id);
 
@@ -46,7 +47,16 @@ impl Framebuffer {
             id,
             renderbuffer: None,
             textures: vec![],
+            size,
         }
+    }
+
+    unsafe fn delete(self) {
+        if let Some(renderbuffer) = self.renderbuffer {
+            gl::DeleteRenderbuffers(1, &renderbuffer.id());
+        }
+
+        gl::DeleteFramebuffers(1, &self.id);
     }
 }
 
@@ -64,18 +74,17 @@ impl FramebufferSet {
         }
     }
 
-    pub fn add_framebuffer(&mut self) {
-        let framebuffer = unsafe { Framebuffer::new() };
+    pub fn add_framebuffer<S>(&mut self, size: S)
+        where
+            S: Into<Vec2d<i32>>,
+    {
+        let framebuffer = unsafe { Framebuffer::new(size.into()) };
         self.framebuffers.push(framebuffer);
 
         self.bind(self.framebuffers.len() - 1);
     }
 
-    pub fn add_renderbuffer<S>(&mut self, size: S, format: RenderbufferFormat)
-                               -> Result<(), FramebufferError>
-        where
-            S: Into<Vec2d<i32>>,
-    {
+    pub fn add_renderbuffer(&mut self, format: RenderbufferFormat) -> Result<(), FramebufferError> {
         let framebuffer = self.active_mut();
 
         if framebuffer.renderbuffer.is_some() {
@@ -83,7 +92,7 @@ impl FramebufferSet {
         }
 
         unsafe {
-            let renderbuffer = Renderbuffer::new(size.into(), format)?;
+            let renderbuffer = Renderbuffer::new(framebuffer.size, format)?;
 
             gl::BindRenderbuffer(gl::RENDERBUFFER, renderbuffer.id());
             gl::FramebufferRenderbuffer(
@@ -99,14 +108,10 @@ impl FramebufferSet {
         Ok(())
     }
 
-    pub fn add_texture<S>(&mut self, size: S, format: TextureFormat)
-                          -> Result<(), FramebufferError>
-        where
-            S: Into<Vec2d<i32>>,
-    {
+    pub fn add_texture(&mut self, format: TextureFormat) -> Result<(), FramebufferError> {
         let framebuffer = self.active_mut();
 
-        let texture = Texture::from_size_and_format(size, format)?;
+        let texture = Texture::from_size_and_format(framebuffer.size, format)?;
 
         unsafe {
             gl::BindTexture(gl::TEXTURE_2D, texture.id());
@@ -172,12 +177,8 @@ impl Drop for FramebufferSet {
     fn drop(&mut self) {
         self.bind_default();
 
-        for framebuffer in &self.framebuffers {
-            unsafe { gl::DeleteFramebuffers(1, &framebuffer.id) }
-
-            if let Some(renderbuffer) = &framebuffer.renderbuffer {
-                unsafe { gl::DeleteRenderbuffers(1, &renderbuffer.id()) }
-            }
+        for framebuffer in self.framebuffers.drain(..) {
+            unsafe { framebuffer.delete() }
         }
     }
 }
