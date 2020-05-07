@@ -5,6 +5,7 @@ mod accept;
 mod draw;
 mod font;
 mod font_render;
+mod format;
 mod framebuffers;
 mod glyphs;
 mod pages;

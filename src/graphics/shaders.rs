@@ -93,7 +93,7 @@ impl ShaderProgram {
     /// The `ShaderProgram` constructor.
     ///
     /// This function is unsafe, because a `ShaderProgram` needs to be properly deleted,
-    /// but `ShaderProgram` doesn't implement `Drop`.
+    /// but it doesn't implement `Drop`.
     unsafe fn new(vs_code: &CStr, fs_code: &CStr) -> Result<ShaderProgram, ShaderError> {
         let vertex_shader = Shader::new_vertex_shader(vs_code)?;
         let fragment_shader = Shader::new_fragment_shader(fs_code)?;

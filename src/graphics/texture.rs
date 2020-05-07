@@ -4,7 +4,10 @@ use im::{
     ImageError,
 };
 
-use crate::common::Vec2d;
+use super::{
+    super::common::Vec2d,
+    format::Format,
+};
 
 #[derive(Debug)]
 pub enum TextureError {
@@ -25,34 +28,45 @@ pub struct Texture {
 
 #[allow(dead_code)]
 impl Texture {
-    pub fn from_size((width, height): (u32, u32)) -> Result<Self, TextureError> {
-        let img = im::DynamicImage::new_rgba8(width, height);
-        Texture::new(img)
-    }
+    pub fn from_size_and_format<S>(size: S, format: Format) -> Result<Self, TextureError>
+        where
+            S: Into<Vec2d<i32>>,
+    { Texture::from_raw(None, format, size.into()) }
 
     pub fn from_file<S>(file: S) -> Result<Self, TextureError>
         where
             S: AsRef<str>,
     {
         let img = im::open(file.as_ref())?;
-        Texture::new(img)
+        Texture::from_image(img)
     }
 
-    pub fn new(img: DynamicImage) -> Result<Self, TextureError> {
-        let width = img.width() as i32;
-        let height = img.height() as i32;
+    pub fn from_image(img: DynamicImage) -> Result<Self, TextureError> {
+        let size = Vec2d::new(img.width() as i32, img.height() as i32);
+
+        let (format, raw) = match img {
+            DynamicImage::ImageLuma8(a) => (Format::R, a.into_raw()),
+            DynamicImage::ImageLumaA8(a) => (Format::RG, a.into_raw()),
+            DynamicImage::ImageRgb8(a) => (Format::RGB, a.into_raw()),
+            DynamicImage::ImageRgba8(a) => (Format::RGBA, a.into_raw()),
+            _ => panic!("Unsupported format!"),
+        };
+
+        Texture::from_raw(Some(raw), format, size)
+    }
+
+    fn from_raw(raw: Option<Vec<u8>>, format: Format, size: Vec2d<i32>)
+                -> Result<Self, TextureError> {
+        let width = size.width();
+        let height = size.height();
 
         if width <= 0 || height <= 0 {
             return Err(TextureError::EmptySize);
         }
 
-        let (format, raw) = match img {
-            DynamicImage::ImageLuma8(a) => (gl::RED, a.into_raw()),
-            DynamicImage::ImageLumaA8(a) => (gl::RG, a.into_raw()),
-            DynamicImage::ImageRgb8(a) => (gl::RGB, a.into_raw()),
-            DynamicImage::ImageRgba8(a) => (gl::RGBA, a.into_raw()),
-            _ => panic!("Unsupported format!"),
-        };
+        let ptr: *const u8 = raw
+            .map(|r| r.as_ptr())
+            .unwrap_or(std::ptr::null());
 
         let mut id = 0;
 
@@ -63,18 +77,16 @@ impl Texture {
             gl::TexImage2D(
                 gl::TEXTURE_2D,
                 0,
-                format as i32,
+                format.gl_format() as i32,
                 width,
                 height,
                 0,
-                format,
+                format.gl_format(),
                 gl::UNSIGNED_BYTE,
-                raw.as_ptr() as *const std::ffi::c_void,
+                ptr as *const std::ffi::c_void,
             );
 
             Texture::set_parameters();
-
-            gl::BindTexture(gl::TEXTURE_2D, 0);
         }
 
         Ok(Texture { id, width, height })
@@ -85,8 +97,6 @@ impl Texture {
         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::NEAREST as i32);
         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::NEAREST as i32);
-
-        gl::GenerateMipmap(gl::TEXTURE_2D);
     }
 
     pub fn id(&self) -> u32 { self.id }
