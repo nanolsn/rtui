@@ -3,6 +3,7 @@ use super::{
     Draw,
     DrawParameters,
     font_render::FontRender,
+    framebuffers::FramebufferSet,
     rect_render::RectRender,
     shader_data::*,
     shaders::*,
@@ -27,6 +28,7 @@ impl From<ShaderError> for RenderError {
 #[derive(Debug)]
 pub struct Render {
     shaders: ShaderSet,
+    framebuffers: FramebufferSet,
     size: Vec2d<i32>,
     rect_render: RectRender,
     font_render: Option<FontRender>,
@@ -55,6 +57,7 @@ impl Render {
 
         Ok(Render {
             shaders,
+            framebuffers: FramebufferSet::new(),
             size: (w, h).into(),
             rect_render: RectRender::new(0, 1),
             font_render: Some(FontRender::new()),

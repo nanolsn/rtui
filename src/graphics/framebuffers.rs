@@ -11,7 +11,6 @@ impl Framebuffer {
     unsafe fn new() -> Self {
         let mut id = 0;
         gl::GenFramebuffers(1, &mut id);
-        gl::BindFramebuffer(gl::FRAMEBUFFER, id);
 
         Framebuffer { id }
     }
@@ -27,10 +26,18 @@ pub struct FramebufferSet {
 
 impl FramebufferSet {
     pub fn new() -> Self {
-        FramebufferSet {
-            framebuffers: vec![],
+        let fb = unsafe { Framebuffer::new() };
+
+        let mut set = FramebufferSet {
+            framebuffers: vec![fb],
             bound: None,
-        }
+        };
+
+        set.bind(0);
+        println!("{}", set.is_completed());
+        set.bind_default();
+
+        set
     }
 
     #[allow(dead_code)]
@@ -52,9 +59,28 @@ impl FramebufferSet {
         }
     }
 
+    pub fn bind_by_id(&mut self, id: u32) -> bool {
+        self.framebuffers
+            .iter()
+            .enumerate()
+            .find(|(_, fb)| fb.id == id)
+            .map(|(idx, _)| idx)
+            .map(|idx| self.bind(idx))
+            .is_some()
+    }
+
     pub fn bind_default(&mut self) {
         unsafe { gl::BindFramebuffer(gl::FRAMEBUFFER, 0) };
         self.bound = None;
+    }
+
+    #[allow(dead_code)]
+    pub fn is_completed(&self) -> bool {
+        if self.bound.is_none() {
+            panic!("Framebuffer not bound!");
+        }
+
+        unsafe { gl::CheckFramebufferStatus(gl::FRAMEBUFFER) == gl::FRAMEBUFFER_COMPLETE }
     }
 }
 
@@ -62,7 +88,7 @@ impl Drop for FramebufferSet {
     fn drop(&mut self) {
         self.bind_default();
 
-        for framebuffer in self.framebuffers.iter() {
+        for framebuffer in &self.framebuffers {
             unsafe { gl::DeleteFramebuffers(1, &framebuffer.id) }
         }
     }

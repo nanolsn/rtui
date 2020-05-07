@@ -250,7 +250,7 @@ impl Drop for ShaderSet {
     fn drop(&mut self) {
         self.unuse_shader();
 
-        for shader in self.shaders.iter() {
+        for shader in &self.shaders {
             unsafe { gl::DeleteProgram(shader.id) }
         }
     }
