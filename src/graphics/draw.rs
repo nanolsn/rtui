@@ -3,7 +3,7 @@ use super::{
         Rect,
         Color,
         Position,
-        Vec2D,
+        Vec2d,
     },
     Render,
 };
@@ -17,7 +17,7 @@ pub struct DrawParameters {
 impl DrawParameters {
     pub fn render_rect<S>(&self, size: S) -> Rect<i32>
         where
-            S: Into<Vec2D<i32>>,
+            S: Into<Vec2d<i32>>,
     { self.position.rect(self.frame, size) }
 }
 

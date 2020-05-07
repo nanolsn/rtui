@@ -1,6 +1,6 @@
 use super::{
     Rect,
-    Vec2D,
+    Vec2d,
 };
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -19,26 +19,26 @@ pub enum Position {
 impl Position {
     pub fn rect<S>(self, frame: Rect<i32>, size: S) -> Rect<i32>
         where
-            S: Into<Vec2D<i32>>,
+            S: Into<Vec2d<i32>>,
     {
         let size = size.into();
 
         let pos = match self {
             Position::Center => frame.size().half() - size.half(),
-            Position::Left(pad) => Vec2D::new(pad, frame.height / 2 - size.y / 2),
-            Position::Right(pad) => Vec2D::new(
+            Position::Left(pad) => Vec2d::new(pad, frame.height / 2 - size.y / 2),
+            Position::Right(pad) => Vec2d::new(
                 frame.width - size.x - pad,
                 frame.height / 2 - size.y / 2,
             ),
-            Position::Bot(pad) => Vec2D::new(frame.width / 2 - size.x / 2, pad),
-            Position::Top(pad) => Vec2D::new(
+            Position::Bot(pad) => Vec2d::new(frame.width / 2 - size.x / 2, pad),
+            Position::Top(pad) => Vec2d::new(
                 frame.width / 2 - size.x / 2,
                 frame.height - size.y - pad,
             ),
-            Position::LeftBot(l, b) => Vec2D::new(l, b),
-            Position::LeftTop(l, t) => Vec2D::new(l, frame.height - size.y - t),
-            Position::RightBot(r, b) => Vec2D::new(frame.width - size.x - r, b),
-            Position::RightTop(r, t) => Vec2D::new(
+            Position::LeftBot(l, b) => Vec2d::new(l, b),
+            Position::LeftTop(l, t) => Vec2d::new(l, frame.height - size.y - t),
+            Position::RightBot(r, b) => Vec2d::new(frame.width - size.x - r, b),
+            Position::RightTop(r, t) => Vec2d::new(
                 frame.width - size.x - r,
                 frame.height - size.y - t,
             ),

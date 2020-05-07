@@ -1,5 +1,5 @@
 use super::{
-    super::common::Vec2D,
+    super::common::Vec2d,
     font::Font,
     glyphs::*,
     Render,
@@ -18,7 +18,7 @@ impl FontRender {
         FontRender { font, buf: Some(Vec::new()) }
     }
 
-    pub fn print(&mut self, render: &mut Render, mut glyphs: Vec<Glyph>, pos: Vec2D<f32>) {
+    pub fn print(&mut self, render: &mut Render, mut glyphs: Vec<Glyph>, pos: Vec2d<f32>) {
         for glyph in glyphs.drain(..) {
             match self.font.page(glyph.code) {
                 None => continue,

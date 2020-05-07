@@ -1,15 +1,15 @@
 use super::Rect;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Default)]
-pub struct Vec2D<T> {
+pub struct Vec2d<T> {
     pub x: T,
     pub y: T,
 }
 
-impl<T> Vec2D<T> {
-    pub fn new(x: T, y: T) -> Self { Vec2D { x, y } }
+impl<T> Vec2d<T> {
+    pub fn new(x: T, y: T) -> Self { Vec2d { x, y } }
 
-    pub fn try_cast<U>(self) -> Option<Vec2D<U>>
+    pub fn try_cast<U>(self) -> Option<Vec2d<U>>
         where
             T: num::NumCast,
             U: num::NumCast,
@@ -18,12 +18,12 @@ impl<T> Vec2D<T> {
         let y: Option<U> = num::cast(self.y);
 
         match (x, y) {
-            (Some(x), Some(y)) => Some(Vec2D::new(x, y)),
+            (Some(x), Some(y)) => Some(Vec2d::new(x, y)),
             _ => None,
         }
     }
 
-    pub fn cast<U>(self) -> Vec2D<U>
+    pub fn cast<U>(self) -> Vec2d<U>
         where
             T: num::NumCast,
             U: num::NumCast,
@@ -38,7 +38,7 @@ impl<T> Vec2D<T> {
     { Rect::new((U::zero(), U::zero()), self.cast()) }
 }
 
-impl<T> Vec2D<T>
+impl<T> Vec2d<T>
     where
         T: Copy,
 {
@@ -46,112 +46,112 @@ impl<T> Vec2D<T>
     pub fn height(&self) -> T { self.y }
 }
 
-impl<T> Vec2D<T>
+impl<T> Vec2d<T>
     where
         T: Copy + num::Num,
 {
-    pub fn half(self) -> Vec2D<T> { self / (T::one() + T::one()) }
+    pub fn half(self) -> Vec2d<T> { self / (T::one() + T::one()) }
 }
 
-impl<T> From<[T; 2]> for Vec2D<T> {
-    fn from([x, y]: [T; 2]) -> Self { Vec2D::new(x, y) }
+impl<T> From<[T; 2]> for Vec2d<T> {
+    fn from([x, y]: [T; 2]) -> Self { Vec2d::new(x, y) }
 }
 
-impl<T> From<(T, T)> for Vec2D<T> {
-    fn from((x, y): (T, T)) -> Self { Vec2D::new(x, y) }
+impl<T> From<(T, T)> for Vec2d<T> {
+    fn from((x, y): (T, T)) -> Self { Vec2d::new(x, y) }
 }
 
-impl<T> From<glm::TVec2<T>> for Vec2D<T>
+impl<T> From<glm::TVec2<T>> for Vec2d<T>
     where
         T: PartialEq + Copy + std::fmt::Debug + 'static,
 {
-    fn from(v: glm::TVec2<T>) -> Self { Vec2D::new(v.x, v.y) }
+    fn from(v: glm::TVec2<T>) -> Self { Vec2d::new(v.x, v.y) }
 }
 
-impl<T, R> std::ops::Add<R> for Vec2D<T>
+impl<T, R> std::ops::Add<R> for Vec2d<T>
     where
-        R: Into<Vec2D<T>>,
+        R: Into<Vec2d<T>>,
         T: std::ops::Add<T>,
 {
-    type Output = Vec2D<T::Output>;
+    type Output = Vec2d<T::Output>;
 
     fn add(self, rhs: R) -> Self::Output {
         let rhs = rhs.into();
-        Vec2D::new(self.x + rhs.x, self.y + rhs.y)
+        Vec2d::new(self.x + rhs.x, self.y + rhs.y)
     }
 }
 
-impl<T, R> std::ops::Sub<R> for Vec2D<T>
+impl<T, R> std::ops::Sub<R> for Vec2d<T>
     where
-        R: Into<Vec2D<T>>,
+        R: Into<Vec2d<T>>,
         T: std::ops::Sub<T>,
 {
-    type Output = Vec2D<T::Output>;
+    type Output = Vec2d<T::Output>;
 
     fn sub(self, rhs: R) -> Self::Output {
         let rhs = rhs.into();
-        Vec2D::new(self.x - rhs.x, self.y - rhs.y)
+        Vec2d::new(self.x - rhs.x, self.y - rhs.y)
     }
 }
 
-impl<T, R> std::ops::AddAssign<R> for Vec2D<T>
+impl<T, R> std::ops::AddAssign<R> for Vec2d<T>
     where
-        R: Into<Vec2D<T>>,
+        R: Into<Vec2d<T>>,
         T: std::ops::Add<T, Output=T> + Copy,
 {
     fn add_assign(&mut self, rhs: R) { *self = *self + rhs }
 }
 
-impl<T, R> std::ops::SubAssign<R> for Vec2D<T>
+impl<T, R> std::ops::SubAssign<R> for Vec2d<T>
     where
-        R: Into<Vec2D<T>>,
+        R: Into<Vec2d<T>>,
         T: std::ops::Sub<T, Output=T> + Copy,
 {
     fn sub_assign(&mut self, rhs: R) { *self = *self - rhs }
 }
 
-impl<T> std::ops::Mul<T> for Vec2D<T>
+impl<T> std::ops::Mul<T> for Vec2d<T>
     where
         T: std::ops::Mul<T> + Copy,
 {
-    type Output = Vec2D<T::Output>;
+    type Output = Vec2d<T::Output>;
 
-    fn mul(self, rhs: T) -> Self::Output { Vec2D::new(self.x * rhs, self.y * rhs) }
+    fn mul(self, rhs: T) -> Self::Output { Vec2d::new(self.x * rhs, self.y * rhs) }
 }
 
-impl<T> std::ops::Div<T> for Vec2D<T>
+impl<T> std::ops::Div<T> for Vec2d<T>
     where
         T: std::ops::Div<T> + Copy,
 {
-    type Output = Vec2D<T::Output>;
+    type Output = Vec2d<T::Output>;
 
-    fn div(self, rhs: T) -> Self::Output { Vec2D::new(self.x / rhs, self.y / rhs) }
+    fn div(self, rhs: T) -> Self::Output { Vec2d::new(self.x / rhs, self.y / rhs) }
 }
 
-impl<T> std::ops::Rem<T> for Vec2D<T>
+impl<T> std::ops::Rem<T> for Vec2d<T>
     where
         T: std::ops::Rem<T> + Copy,
 {
-    type Output = Vec2D<T::Output>;
+    type Output = Vec2d<T::Output>;
 
-    fn rem(self, rhs: T) -> Self::Output { Vec2D::new(self.x % rhs, self.y % rhs) }
+    fn rem(self, rhs: T) -> Self::Output { Vec2d::new(self.x % rhs, self.y % rhs) }
 }
 
-impl<T> std::ops::MulAssign<T> for Vec2D<T>
+impl<T> std::ops::MulAssign<T> for Vec2d<T>
     where
         T: std::ops::Mul<T, Output=T> + Copy,
 {
     fn mul_assign(&mut self, rhs: T) { *self = *self * rhs }
 }
 
-impl<T> std::ops::DivAssign<T> for Vec2D<T>
+impl<T> std::ops::DivAssign<T> for Vec2d<T>
     where
         T: std::ops::Div<T, Output=T> + Copy,
 {
     fn div_assign(&mut self, rhs: T) { *self = *self / rhs }
 }
 
-impl<T> std::ops::RemAssign<T> for Vec2D<T>
+impl<T> std::ops::RemAssign<T> for Vec2d<T>
     where
         T: std::ops::Rem<T, Output=T> + Copy,
 {

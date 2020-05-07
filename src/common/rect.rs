@@ -1,4 +1,4 @@
-use super::Vec2D;
+use super::Vec2d;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct Rect<T> {
@@ -11,8 +11,8 @@ pub struct Rect<T> {
 impl<T> Rect<T> {
     pub fn new<P, S>(pos: P, size: S) -> Self
         where
-            P: Into<Vec2D<T>>,
-            S: Into<Vec2D<T>>,
+            P: Into<Vec2d<T>>,
+            S: Into<Vec2d<T>>,
     {
         let pos = pos.into();
         let size = size.into();
@@ -52,9 +52,9 @@ impl<T> Rect<T>
     where
         T: Copy,
 {
-    pub fn pos(&self) -> Vec2D<T> { Vec2D::new(self.x, self.y) }
+    pub fn pos(&self) -> Vec2d<T> { Vec2d::new(self.x, self.y) }
 
-    pub fn size(&self) -> Vec2D<T> { Vec2D::new(self.width, self.height) }
+    pub fn size(&self) -> Vec2d<T> { Vec2d::new(self.width, self.height) }
 }
 
 #[allow(dead_code)]
@@ -70,7 +70,7 @@ impl<T> Rect<T>
 
     pub fn top(&self) -> T { self.y + self.height }
 
-    pub fn center(&self) -> Vec2D<T> { self.pos() + self.size().half() }
+    pub fn center(&self) -> Vec2d<T> { self.pos() + self.size().half() }
 
     pub fn scale(&mut self, factor: T) {
         self.width = self.width * factor;
@@ -84,7 +84,7 @@ impl<T> Rect<T>
 
     pub fn translate<P>(&mut self, delta: P)
         where
-            P: Into<Vec2D<T>>,
+            P: Into<Vec2d<T>>,
     {
         let delta = delta.into();
 
@@ -94,7 +94,7 @@ impl<T> Rect<T>
 
     pub fn translated<P>(mut self, delta: P) -> Self
         where
-            P: Into<Vec2D<T>>,
+            P: Into<Vec2d<T>>,
     {
         self.translate(delta);
         self
@@ -108,7 +108,7 @@ impl<T> Rect<T>
 {
     pub fn intersects_point<P>(&self, point: P) -> bool
         where
-            P: Into<Vec2D<T>>,
+            P: Into<Vec2d<T>>,
     {
         let point = point.into();
 

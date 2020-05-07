@@ -1,5 +1,5 @@
 use super::{
-    super::common::Vec2D,
+    super::common::Vec2d,
     font::GlyphSize,
 };
 
@@ -17,13 +17,13 @@ impl Glyph {
 #[derive(Debug)]
 pub struct Glyphs {
     glyphs: Vec<Glyph>,
-    size: Vec2D<i32>,
+    size: Vec2d<i32>,
 }
 
 impl Glyphs {
-    pub fn new(glyphs: Vec<Glyph>, size: Vec2D<i32>) -> Self { Glyphs { glyphs, size } }
+    pub fn new(glyphs: Vec<Glyph>, size: Vec2d<i32>) -> Self { Glyphs { glyphs, size } }
 
-    pub fn size(&self) -> Vec2D<i32> { self.size }
+    pub fn size(&self) -> Vec2d<i32> { self.size }
 
     pub fn into_inner(self) -> Vec<Glyph> { self.glyphs }
 }

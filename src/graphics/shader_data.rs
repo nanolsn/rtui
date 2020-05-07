@@ -1,7 +1,7 @@
 use super::{
     super::common::Color,
     shaders::ShaderSet,
-    uniform::{
+    uniforms::{
         Uniform,
         SharedUniform,
         UniformError,

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use super::{
     super::common::{
-        Vec2D,
+        Vec2d,
         Rect,
     },
     glyphs::*,
@@ -27,10 +27,10 @@ impl GlyphSize {
 
 #[derive(Debug)]
 pub struct Font {
-    atlas_size: Vec2D<i32>,
+    atlas_size: Vec2d<i32>,
     glyphs_on_page: i32,
-    glyph_size_default: Vec2D<i32>,
-    glyphs_st_default: Vec2D<f32>,
+    glyph_size_default: Vec2d<i32>,
+    glyphs_st_default: Vec2d<f32>,
     indent: i32,
     line_spacing: i32,
     pages: Pages<Texture>,
@@ -46,7 +46,7 @@ impl Font {
         glyph_widths: HashMap<char, GlyphSize>,
     ) -> Self
         where
-            S: Into<Vec2D<i32>>,
+            S: Into<Vec2d<i32>>,
     {
         let atlas_size = atlas_size.into();
 
@@ -57,8 +57,8 @@ impl Font {
         Font {
             atlas_size,
             glyphs_on_page: atlas_size.x * atlas_size.y,
-            glyph_size_default: Vec2D::new(glyph_width, glyph_height),
-            glyphs_st_default: Vec2D::new(1.0 / atlas_size.x as f32, 1.0 / atlas_size.y as f32),
+            glyph_size_default: Vec2d::new(glyph_width, glyph_height),
+            glyphs_st_default: Vec2d::new(1.0 / atlas_size.x as f32, 1.0 / atlas_size.y as f32),
             indent,
             line_spacing,
             pages,
@@ -81,13 +81,13 @@ impl Font {
             delta_x += size.width + indent;
         }
 
-        Glyphs::new(buf, Vec2D::new(
+        Glyphs::new(buf, Vec2d::new(
             (delta_x - indent) as i32,
             self.glyph_size_default.height(),
         ))
     }
 
-    fn placing(&self, glyph: Glyph, pos: Vec2D<f32>) -> Rect<f32> {
+    fn placing(&self, glyph: Glyph, pos: Vec2d<f32>) -> Rect<f32> {
         Rect::new(
             (pos.x + glyph.delta_x, pos.y),
             (glyph.size.width, self.glyph_size_default.height() as f32),
@@ -111,7 +111,7 @@ impl Font {
         ))
     }
 
-    pub fn render_rect(&self, glyph: Glyph, pos: Vec2D<f32>) -> (Rect<f32>, Rect<f32>) {
+    pub fn render_rect(&self, glyph: Glyph, pos: Vec2d<f32>) -> (Rect<f32>, Rect<f32>) {
         (self.placing(glyph, pos), self.st_map(glyph))
     }
 

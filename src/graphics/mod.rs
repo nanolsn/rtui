@@ -5,6 +5,7 @@ mod accept;
 mod draw;
 mod font;
 mod font_render;
+mod framebuffers;
 mod glyphs;
 mod pages;
 mod rect_render;
@@ -12,7 +13,7 @@ mod render;
 mod shader_data;
 mod shaders;
 mod texture;
-mod uniform;
+mod uniforms;
 mod window;
 
 pub use draw::{Draw, DrawParameters};

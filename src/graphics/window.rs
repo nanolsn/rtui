@@ -2,7 +2,7 @@ use super::render::Render;
 use crate::{
     common::{
         Color,
-        Vec2D,
+        Vec2d,
     },
 };
 
@@ -75,7 +75,7 @@ impl Window {
                 Event::WindowEvent { event, .. } => match event {
                     WindowEvent::Resized(size) => {
                         let (w, h) = size.into();
-                        render.resize(Vec2D::new(w, h));
+                        render.resize(Vec2d::new(w, h));
                         context.resize(size);
                     }
                     WindowEvent::CloseRequested => { *control_flow = ControlFlow::Exit }

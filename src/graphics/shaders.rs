@@ -3,12 +3,12 @@ use std::ffi::CStr;
 use super::{
     accept::Accept,
     shader_data::UsedShader,
-    uniform::{
+    uniforms::{
         Uniform,
         UniformError,
+        SharedUniform,
     },
 };
-use crate::graphics::uniform::SharedUniform;
 
 const INFO_LOG_SIZE: usize = 512;
 

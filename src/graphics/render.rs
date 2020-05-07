@@ -1,13 +1,13 @@
 use super::{
     super::common::*,
-    shaders::*,
-    shader_data::*,
-    rect_render::RectRender,
-    font_render::FontRender,
-    texture::Texture,
-    uniform::UniformError,
     Draw,
     DrawParameters,
+    font_render::FontRender,
+    rect_render::RectRender,
+    shader_data::*,
+    shaders::*,
+    texture::Texture,
+    uniforms::UniformError,
 };
 
 #[derive(Debug)]
@@ -27,7 +27,7 @@ impl From<ShaderError> for RenderError {
 #[derive(Debug)]
 pub struct Render {
     shaders: ShaderSet,
-    size: Vec2D<i32>,
+    size: Vec2d<i32>,
     rect_render: RectRender,
     font_render: Option<FontRender>,
     base_data: BaseData,
@@ -41,21 +41,7 @@ impl Render {
 
         unsafe { Render::set_defaults() }
 
-        let mut shaders = ShaderSet::new();
-
-        assert_eq!(shaders.len(), UsedShader::Base as usize);
-        shaders.add(
-            c_str!(include_str!("../shaders/ui_vs.glsl")),
-            c_str!(include_str!("../shaders/ui_fs.glsl")),
-        )?;
-
-        assert_eq!(shaders.len(), UsedShader::Font as usize);
-        shaders.add(
-            c_str!(include_str!("../shaders/ui_vs.glsl")),
-            c_str!(include_str!("../shaders/font_fs.glsl")),
-        )?;
-
-        let base_data = BaseData::new(&mut shaders)?;
+        let mut shaders = Render::make_shader_set()?;
 
         let (w, h): (i32, i32) = context
             .window()
@@ -63,7 +49,8 @@ impl Render {
             .to_logical::<i32>(context.window().scale_factor())
             .into();
 
-        let projection = Render::make_projection((w as f32, h as f32));
+        let projection = Render::make_ortho((w as f32, h as f32));
+        let base_data = BaseData::new(&mut shaders)?;
         let shader_data = ShaderData::new(&mut shaders, projection)?;
 
         Ok(Render {
@@ -84,9 +71,27 @@ impl Render {
         gl::Disable(gl::CULL_FACE);
     }
 
-    fn make_projection<S>(size: S) -> glm::Mat4
+    fn make_shader_set() -> Result<ShaderSet, ShaderError> {
+        let mut shaders = ShaderSet::new();
+
+        assert_eq!(shaders.len(), UsedShader::Base as usize);
+        shaders.add(
+            c_str!(include_str!("../shaders/ui_vs.glsl")),
+            c_str!(include_str!("../shaders/ui_fs.glsl")),
+        )?;
+
+        assert_eq!(shaders.len(), UsedShader::Font as usize);
+        shaders.add(
+            c_str!(include_str!("../shaders/ui_vs.glsl")),
+            c_str!(include_str!("../shaders/font_fs.glsl")),
+        )?;
+
+        Ok(shaders)
+    }
+
+    fn make_ortho<S>(size: S) -> glm::Mat4
         where
-            S: Into<Vec2D<f32>>,
+            S: Into<Vec2d<f32>>,
     {
         const NEAR: f32 = 0.0;
         const FAR: f32 = 10.0;
@@ -96,18 +101,16 @@ impl Render {
     }
 
     #[allow(dead_code)]
-    pub fn size(&self) -> Vec2D<i32> { self.size }
+    pub fn size(&self) -> Vec2d<i32> { self.size }
 
-    pub fn resize(&mut self, size: Vec2D<i32>) {
-        unsafe { Render::resize_viewport(size) }
+    pub fn resize(&mut self, size: Vec2d<i32>) {
+        unsafe { gl::Viewport(0, 0, size.x, size.y) }
 
-        let projection = Render::make_projection(size.cast::<f32>());
+        let projection = Render::make_ortho(size.cast::<f32>());
         self.shader_data.projection.set_value(projection);
 
         self.size = size;
     }
-
-    unsafe fn resize_viewport(size: Vec2D<i32>) { gl::Viewport(0, 0, size.x, size.y) }
 
     pub fn clear(&self, color: Color) {
         unsafe {
