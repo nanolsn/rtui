@@ -3,11 +3,12 @@ use super::{
     Draw,
     DrawParameters,
     font_render::FontRender,
-    framebuffers::FramebufferSet,
+    framebuffers::{FramebufferSet, FramebufferError},
     rect_render::RectRender,
     shader_data::*,
     shaders::*,
-    texture::Texture,
+    texture::{Texture, Format as TextureFormat},
+    renderbuffer::Format as RenderbufferFormat,
     uniforms::UniformError,
 };
 
@@ -15,6 +16,7 @@ use super::{
 pub enum RenderError {
     UniformError(UniformError),
     ShaderError(ShaderError),
+    FramebufferError(FramebufferError),
 }
 
 impl From<UniformError> for RenderError {
@@ -23,6 +25,10 @@ impl From<UniformError> for RenderError {
 
 impl From<ShaderError> for RenderError {
     fn from(e: ShaderError) -> Self { RenderError::ShaderError(e) }
+}
+
+impl From<FramebufferError> for RenderError {
+    fn from(e: FramebufferError) -> Self { RenderError::FramebufferError(e) }
 }
 
 #[derive(Debug)]
@@ -55,9 +61,15 @@ impl Render {
         let base_data = BaseData::new(&mut shaders)?;
         let shader_data = ShaderData::new(&mut shaders, projection)?;
 
+        let mut framebuffers = FramebufferSet::new();
+        framebuffers.add_framebuffer();
+        framebuffers.add_texture((w, h), TextureFormat::RGB)?;
+        framebuffers.add_renderbuffer((w, h), RenderbufferFormat::Depth24)?;
+        framebuffers.bind_default();
+
         Ok(Render {
             shaders,
-            framebuffers: FramebufferSet::new(),
+            framebuffers,
             size: (w, h).into(),
             rect_render: RectRender::new(0, 1),
             font_render: Some(FontRender::new()),

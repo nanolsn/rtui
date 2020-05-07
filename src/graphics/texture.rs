@@ -4,10 +4,26 @@ use im::{
     ImageError,
 };
 
-use super::{
-    super::common::Vec2d,
-    format::Format,
-};
+use crate::common::Vec2d;
+
+#[derive(Debug)]
+pub enum Format {
+    R,
+    RG,
+    RGB,
+    RGBA,
+}
+
+impl Format {
+    pub fn gl_format(&self) -> u32 {
+        match self {
+            Format::R => gl::RED,
+            Format::RG => gl::RG,
+            Format::RGB => gl::RGB,
+            Format::RGBA => gl::RGBA,
+        }
+    }
+}
 
 #[derive(Debug)]
 pub enum TextureError {

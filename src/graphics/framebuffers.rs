@@ -1,6 +1,36 @@
+use super::{
+    super::common::Vec2d,
+    renderbuffer::{
+        Renderbuffer,
+        RenderbufferError,
+        Format as RenderbufferFormat,
+    },
+    texture::{
+        Texture,
+        TextureError,
+        Format as TextureFormat,
+    },
+};
+
+#[derive(Debug)]
+pub enum FramebufferError {
+    RenderbufferError(RenderbufferError),
+    TextureError(TextureError),
+}
+
+impl From<RenderbufferError> for FramebufferError {
+    fn from(e: RenderbufferError) -> Self { FramebufferError::RenderbufferError(e) }
+}
+
+impl From<TextureError> for FramebufferError {
+    fn from(e: TextureError) -> Self { FramebufferError::TextureError(e) }
+}
+
 #[derive(Debug)]
 pub struct Framebuffer {
     id: u32,
+    renderbuffer: Option<Renderbuffer>,
+    textures: Vec<Texture>,
 }
 
 impl Framebuffer {
@@ -12,10 +42,12 @@ impl Framebuffer {
         let mut id = 0;
         gl::GenFramebuffers(1, &mut id);
 
-        Framebuffer { id }
+        Framebuffer {
+            id,
+            renderbuffer: None,
+            textures: vec![],
+        }
     }
-
-    pub fn id(&self) -> u32 { self.id }
 }
 
 #[derive(Debug)]
@@ -26,27 +58,89 @@ pub struct FramebufferSet {
 
 impl FramebufferSet {
     pub fn new() -> Self {
-        let fb = unsafe { Framebuffer::new() };
-
-        let mut set = FramebufferSet {
-            framebuffers: vec![fb],
+        FramebufferSet {
+            framebuffers: vec![],
             bound: None,
-        };
+        }
+    }
 
-        set.bind(0);
-        println!("{}", set.is_completed());
-        set.bind_default();
+    pub fn add_framebuffer(&mut self) {
+        let framebuffer = unsafe { Framebuffer::new() };
+        self.framebuffers.push(framebuffer);
 
-        set
+        self.bind(self.framebuffers.len() - 1);
+    }
+
+    pub fn add_renderbuffer<S>(&mut self, size: S, format: RenderbufferFormat)
+                               -> Result<(), FramebufferError>
+        where
+            S: Into<Vec2d<i32>>,
+    {
+        let framebuffer = self.active_mut();
+
+        if framebuffer.renderbuffer.is_some() {
+            panic!("The renderbuffer already added!");
+        }
+
+        unsafe {
+            let renderbuffer = Renderbuffer::new(size.into(), format)?;
+
+            gl::BindRenderbuffer(gl::RENDERBUFFER, renderbuffer.id());
+            gl::FramebufferRenderbuffer(
+                gl::FRAMEBUFFER,
+                renderbuffer.attachment(),
+                gl::RENDERBUFFER,
+                renderbuffer.id(),
+            );
+
+            framebuffer.renderbuffer = Some(renderbuffer);
+        }
+
+        Ok(())
+    }
+
+    pub fn add_texture<S>(&mut self, size: S, format: TextureFormat)
+                          -> Result<(), FramebufferError>
+        where
+            S: Into<Vec2d<i32>>,
+    {
+        let framebuffer = self.active_mut();
+
+        let texture = Texture::from_size_and_format(size, format)?;
+
+        unsafe {
+            gl::BindTexture(gl::TEXTURE_2D, texture.id());
+            gl::FramebufferTexture2D(
+                gl::FRAMEBUFFER,
+                gl::COLOR_ATTACHMENT0 + framebuffer.textures.len() as u32,
+                gl::TEXTURE_2D,
+                texture.id(),
+                0,
+            );
+        }
+
+        framebuffer.textures.push(texture);
+
+        Ok(())
     }
 
     #[allow(dead_code)]
     pub fn len(&self) -> usize { self.framebuffers.len() }
 
-    pub fn active(&self) -> Option<&Framebuffer> {
-        self.bound.map(|idx| &self.framebuffers[idx])
+    #[allow(dead_code)]
+    pub fn active(&self) -> &Framebuffer {
+        self.bound
+            .map(|idx| &self.framebuffers[idx])
+            .expect("Framebuffer not bound!")
     }
 
+    pub fn active_mut(&mut self) -> &mut Framebuffer {
+        self.bound
+            .map(move |idx| &mut self.framebuffers[idx])
+            .expect("Framebuffer not bound!")
+    }
+
+    #[allow(dead_code)]
     pub fn bound(&self) -> Option<usize> { self.bound }
 
     pub fn bind(&mut self, idx: usize) {
@@ -57,16 +151,6 @@ impl FramebufferSet {
                 self.bound = Some(idx);
             }
         }
-    }
-
-    pub fn bind_by_id(&mut self, id: u32) -> bool {
-        self.framebuffers
-            .iter()
-            .enumerate()
-            .find(|(_, fb)| fb.id == id)
-            .map(|(idx, _)| idx)
-            .map(|idx| self.bind(idx))
-            .is_some()
     }
 
     pub fn bind_default(&mut self) {
@@ -80,7 +164,7 @@ impl FramebufferSet {
             panic!("Framebuffer not bound!");
         }
 
-        unsafe { gl::CheckFramebufferStatus(gl::FRAMEBUFFER) == gl::FRAMEBUFFER_COMPLETE }
+        unsafe { gl::CheckFramebufferStatus(gl::DRAW_FRAMEBUFFER) == gl::FRAMEBUFFER_COMPLETE }
     }
 }
 
@@ -90,6 +174,10 @@ impl Drop for FramebufferSet {
 
         for framebuffer in &self.framebuffers {
             unsafe { gl::DeleteFramebuffers(1, &framebuffer.id) }
+
+            if let Some(renderbuffer) = &framebuffer.renderbuffer {
+                unsafe { gl::DeleteRenderbuffers(1, &renderbuffer.id()) }
+            }
         }
     }
 }
