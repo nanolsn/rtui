@@ -1,6 +1,6 @@
 use crate::common::Vec2d;
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 #[allow(dead_code)]
 pub enum Format {
     Depth16,
@@ -49,7 +49,7 @@ impl Format {
 
 #[derive(Debug)]
 pub enum RenderbufferError {
-    EmptySize,
+    NegativeSize,
 }
 
 #[derive(Debug)]
@@ -67,8 +67,8 @@ impl Renderbuffer {
         let width = size.width();
         let height = size.height();
 
-        if width <= 0 || height <= 0 {
-            return Err(RenderbufferError::EmptySize);
+        if width < 0 || height < 0 {
+            return Err(RenderbufferError::NegativeSize);
         }
 
         let mut id = 0;
@@ -87,6 +87,8 @@ impl Renderbuffer {
     }
 
     pub fn id(&self) -> u32 { self.id }
+
+    pub fn format(&self) -> Format { self.format }
 
     pub fn attachment(&self) -> u32 { self.format.attachment() }
 }

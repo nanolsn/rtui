@@ -54,7 +54,7 @@ impl Window {
         self
     }
 
-    pub fn run<F>(self, mut f: F)
+    pub fn run<F>(self, mut draw_frame_fn: F)
         where
             F: FnMut(&mut Render) + 'static,
     {
@@ -79,15 +79,18 @@ impl Window {
                         context.resize(size);
                     }
                     WindowEvent::CloseRequested => { *control_flow = ControlFlow::Exit }
-                    WindowEvent::Focused(f) => { focused = f }
+                    WindowEvent::Focused(flag) => { focused = flag }
                     _ => (),
                 }
                 Event::NewEvents(StartCause::Poll) => {
                     if !focused { return; }
 
+                    render.begin_draw_frame();
                     render.clear(bg);
 
-                    f(&mut render);
+                    draw_frame_fn(&mut render);
+
+                    render.end_draw_frame();
 
                     context.swap_buffers().unwrap();
                 }

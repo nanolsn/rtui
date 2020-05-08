@@ -6,7 +6,7 @@ use im::{
 
 use crate::common::Vec2d;
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum Format {
     R,
     RG,
@@ -28,7 +28,7 @@ impl Format {
 #[derive(Debug)]
 pub enum TextureError {
     ImageError(ImageError),
-    EmptySize,
+    NegativeSize,
 }
 
 impl From<ImageError> for TextureError {
@@ -40,6 +40,7 @@ pub struct Texture {
     id: u32,
     width: i32,
     height: i32,
+    format: Format,
 }
 
 #[allow(dead_code)]
@@ -76,8 +77,8 @@ impl Texture {
         let width = size.width();
         let height = size.height();
 
-        if width <= 0 || height <= 0 {
-            return Err(TextureError::EmptySize);
+        if width < 0 || height < 0 {
+            return Err(TextureError::NegativeSize);
         }
 
         let ptr: *const u8 = raw
@@ -105,7 +106,7 @@ impl Texture {
             Texture::set_parameters();
         }
 
-        Ok(Texture { id, width, height })
+        Ok(Texture { id, width, height, format })
     }
 
     unsafe fn set_parameters() {
@@ -129,6 +130,8 @@ impl Texture {
     pub fn height(&self) -> i32 { self.height }
 
     pub fn size(&self) -> Vec2d<i32> { Vec2d::new(self.width, self.height) }
+
+    pub fn format(&self) -> Format { self.format }
 }
 
 impl Drop for Texture {

@@ -67,7 +67,6 @@ impl Render {
         framebuffers.add_framebuffer((w, h));
         framebuffers.add_texture(TextureFormat::RGB)?;
         framebuffers.add_renderbuffer(RenderbufferFormat::Depth24)?;
-        framebuffers.bind_default();
 
         Ok(Render {
             shaders,
@@ -133,7 +132,18 @@ impl Render {
         let projection = Render::make_ortho(size.cast::<f32>());
         self.shader_data.projection.set_value(projection);
 
+        self.framebuffers.bind(0);
+        self.framebuffers.resize(size).unwrap();
+
         self.size = size;
+    }
+
+    pub(super) fn begin_draw_frame(&mut self) {
+        self.framebuffers.bind_default();
+    }
+
+    pub(super) fn end_draw_frame(&mut self) {
+        //
     }
 
     pub fn clear(&self, color: Color) {

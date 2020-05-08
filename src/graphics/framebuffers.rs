@@ -51,8 +51,12 @@ impl Framebuffer {
         }
     }
 
-    unsafe fn delete(self) {
-        if let Some(renderbuffer) = self.renderbuffer {
+    /// The `Framebuffer` destructor.
+    ///
+    /// This function is unsafe, because a creation of `Framebuffer` requires
+    /// to call `delete` only once.
+    unsafe fn delete(&mut self) {
+        if let Some(renderbuffer) = self.renderbuffer.take() {
             gl::DeleteRenderbuffers(1, &renderbuffer.id());
         }
 
@@ -159,8 +163,10 @@ impl FramebufferSet {
     }
 
     pub fn bind_default(&mut self) {
-        unsafe { gl::BindFramebuffer(gl::FRAMEBUFFER, 0) };
-        self.bound = None;
+        if self.bound.is_some() {
+            unsafe { gl::BindFramebuffer(gl::FRAMEBUFFER, 0) };
+            self.bound = None;
+        }
     }
 
     #[allow(dead_code)]
@@ -171,13 +177,47 @@ impl FramebufferSet {
 
         unsafe { gl::CheckFramebufferStatus(gl::DRAW_FRAMEBUFFER) == gl::FRAMEBUFFER_COMPLETE }
     }
+
+    pub fn resize<S>(&mut self, size: S) -> Result<(), FramebufferError>
+        where
+            S: Into<Vec2d<i32>>,
+    {
+        let framebuffer = self.active_mut();
+
+        // Save old textures (It needs only texture formats)
+        let textures = std::mem::replace(&mut framebuffer.textures, vec![]);
+
+        // Take the renderbuffer format. Leave the renderbuffer in the framebuffer
+        // to delete them both.
+        let renderbuffer_format = framebuffer.renderbuffer
+            .as_ref()
+            .map(|rb| rb.format());
+
+        // Recreate the framebuffer with new size
+        unsafe {
+            framebuffer.delete();
+            *framebuffer = Framebuffer::new(size.into());
+        }
+
+        // Add the new renderbuffer
+        if let Some(format) = renderbuffer_format {
+            self.add_renderbuffer(format)?;
+        }
+
+        // Add new textures
+        for texture in textures {
+            self.add_texture(texture.format())?;
+        }
+
+        Ok(())
+    }
 }
 
 impl Drop for FramebufferSet {
     fn drop(&mut self) {
         self.bind_default();
 
-        for framebuffer in self.framebuffers.drain(..) {
+        for mut framebuffer in self.framebuffers.drain(..) {
             unsafe { framebuffer.delete() }
         }
     }
