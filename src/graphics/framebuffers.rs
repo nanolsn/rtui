@@ -62,6 +62,10 @@ impl Framebuffer {
 
         gl::DeleteFramebuffers(1, &self.id);
     }
+
+    pub fn textures(&self) -> &[Texture] { self.textures.as_slice() }
+
+    pub fn size(&self) -> Vec2d<i32> { self.size }
 }
 
 #[derive(Debug)]
@@ -136,7 +140,6 @@ impl FramebufferSet {
     #[allow(dead_code)]
     pub fn len(&self) -> usize { self.framebuffers.len() }
 
-    #[allow(dead_code)]
     pub fn active(&self) -> &Framebuffer {
         self.bound
             .map(|idx| &self.framebuffers[idx])
@@ -156,7 +159,7 @@ impl FramebufferSet {
         match self.bound {
             Some(i) if i == idx => return,
             _ => {
-                unsafe { gl::BindFramebuffer(gl::FRAMEBUFFER, self.framebuffers[idx].id) };
+                unsafe { FramebufferSet::bind_unsafe(self.framebuffers[idx].id) };
                 self.bound = Some(idx);
             }
         }
@@ -164,10 +167,12 @@ impl FramebufferSet {
 
     pub fn bind_default(&mut self) {
         if self.bound.is_some() {
-            unsafe { gl::BindFramebuffer(gl::FRAMEBUFFER, 0) };
+            unsafe { FramebufferSet::bind_unsafe(0) };
             self.bound = None;
         }
     }
+
+    unsafe fn bind_unsafe(id: u32) { gl::BindFramebuffer(gl::FRAMEBUFFER, id) }
 
     #[allow(dead_code)]
     pub fn is_completed(&self) -> bool {
@@ -197,6 +202,7 @@ impl FramebufferSet {
         unsafe {
             framebuffer.delete();
             *framebuffer = Framebuffer::new(size.into());
+            FramebufferSet::bind_unsafe(framebuffer.id);
         }
 
         // Add the new renderbuffer
@@ -211,8 +217,6 @@ impl FramebufferSet {
 
         Ok(())
     }
-
-    pub fn size(&self) -> Vec2d<i32> { self.active().size }
 }
 
 impl Drop for FramebufferSet {

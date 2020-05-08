@@ -18,6 +18,7 @@ pub enum RenderError {
     UniformError(UniformError),
     ShaderError(ShaderError),
     FramebufferError(FramebufferError),
+    WrongPixelSize,
 }
 
 impl From<UniformError> for RenderError {
@@ -38,6 +39,7 @@ pub struct Render {
     shaders: ShaderSet,
     framebuffers: FramebufferSet,
     size: Vec2d<i32>,
+    pixel_size: i32,
     rect_render: RectRender,
     font_render: Option<FontRender>,
     base_data: BaseData,
@@ -46,8 +48,12 @@ pub struct Render {
 }
 
 impl Render {
-    pub fn new(context: &glutin::WindowedContext<glutin::PossiblyCurrent>)
+    pub fn new(context: &glutin::WindowedContext<glutin::PossiblyCurrent>, pixel_size: i32)
                -> Result<Self, RenderError> {
+        if pixel_size <= 0 {
+            return Err(RenderError::WrongPixelSize);
+        }
+
         gl::load_with(|ptr| context.get_proc_address(ptr) as *const _);
 
         unsafe { Render::set_defaults() };
@@ -60,21 +66,24 @@ impl Render {
             .to_logical::<i32>(context.window().scale_factor())
             .into();
 
-        let projection = Render::make_ortho((w as f32, h as f32));
+        let size: Vec2d<i32> = (w / pixel_size, h / pixel_size).into();
+
+        let projection = Render::make_ortho(size.cast::<f32>());
         let base_data = BaseData::new(&mut shaders)?;
         let post_data = PostData::new(&mut shaders)?;
         let shader_data = ShaderData::new(&mut shaders, projection)?;
 
         let mut framebuffers = FramebufferSet::new();
-        framebuffers.add_framebuffer((w, h));
+        framebuffers.add_framebuffer(size);
         framebuffers.add_texture(TextureFormat::RGB)?;
         framebuffers.add_renderbuffer(RenderbufferFormat::Depth24)?;
 
         Ok(Render {
-            viewport: Viewport::new((w, h)),
+            viewport: Viewport::new(size),
             shaders,
             framebuffers,
-            size: (w, h).into(),
+            size,
+            pixel_size,
             rect_render: RectRender::new(0, 1),
             font_render: Some(FontRender::new()),
             base_data,
@@ -130,7 +139,7 @@ impl Render {
     pub fn size(&self) -> Vec2d<i32> { self.size }
 
     pub(super) fn resize(&mut self, size: Vec2d<i32>) {
-        self.viewport.resize(size);
+        let size = size / self.pixel_size;
 
         let projection = Render::make_ortho(size.cast::<f32>());
         self.shader_data.projection.set_value(projection);
@@ -142,11 +151,28 @@ impl Render {
     }
 
     pub(super) fn begin_draw_frame(&mut self) {
-        self.framebuffers.bind_default();
+        self.framebuffers.bind(0);
+        self.viewport.resize(self.framebuffers.active().size());
     }
 
     pub(super) fn end_draw_frame(&mut self) {
-        //
+        self.framebuffers
+            .active()
+            .textures()
+            .iter()
+            .enumerate()
+            .for_each(|(i, texture)| texture.bind(i as u32));
+
+        self.framebuffers.bind_default();
+        self.viewport.resize(self.size * self.pixel_size);
+        self.clear(Color::black());
+
+        self.draw_rect_accept(
+            UsedShader::Post,
+            Rect::new((-1.0, -1.0), (2.0, 2.0)),
+            None,
+            false,
+        );
     }
 
     pub fn clear(&self, color: Color) {
@@ -157,18 +183,20 @@ impl Render {
     }
 
     pub fn draw_rect(&mut self, rect: Rect<f32>) {
-        self.draw_rect_accept(UsedShader::Base, rect, None);
+        self.draw_rect_accept(UsedShader::Base, rect, None, true);
     }
 
     #[allow(dead_code)]
     pub fn draw_rect_st(&mut self, rect: Rect<f32>, st: Rect<f32>) {
-        self.draw_rect_accept(UsedShader::Base, rect, Some(st));
+        self.draw_rect_accept(UsedShader::Base, rect, Some(st), true);
     }
 
-    pub(super) fn draw_rect_accept(&mut self,
-                                   shader: UsedShader,
-                                   rect: Rect<f32>,
-                                   st: Option<Rect<f32>>,
+    pub(super) fn draw_rect_accept(
+        &mut self,
+        shader: UsedShader,
+        rect: Rect<f32>,
+        st: Option<Rect<f32>>,
+        flip_v: bool,
     ) {
         self.shaders.use_shader(shader as usize);
         self.shader_data.accept(&self.shaders);
@@ -181,7 +209,7 @@ impl Render {
             self.post_data.frame.accept(&self.shaders);
         }
 
-        self.rect_render.draw(rect, st);
+        self.rect_render.draw(rect, st, flip_v);
     }
 
     pub fn draw<D>(&mut self, draw: &D)

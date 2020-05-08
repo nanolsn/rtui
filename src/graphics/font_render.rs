@@ -26,7 +26,7 @@ impl FontRender {
             }
 
             let (placing, st_map) = self.font.render_rect(glyph, pos);
-            render.draw_rect_accept(UsedShader::Font, placing, Some(st_map));
+            render.draw_rect_accept(UsedShader::Font, placing, Some(st_map), true);
         }
 
         self.buf = Some(glyphs);

@@ -7,9 +7,10 @@ use graphics::Window;
 use ui::*;
 
 fn main() {
-    let window = Window::new("App", (600, 400));
+    let window = Window::new("App", (600, 400), 2);
 
-    let rect = Col::red(Rect::new((30, 30), (80, 40)));
+    let rect = Col::red(Rect::new((31, 31), (2, 2)));
+    let dot = Rect::new((30, 30), (1, 1));
     let img = Pos::right_bot(4, 4, Image::new("data/1.png", window.render()));
     let text = Col::green("jie adding the КАПС README.,!:;|*@ Привет, мир ЪЁь!1230");
     let hello = Col::blue("Hello, world! MOW");
@@ -17,6 +18,7 @@ fn main() {
 
     window.run(move |render| {
         render.draw(&rect);
+        render.draw(&dot);
         render.draw(&img);
         render.draw(&Pos::left_top(0, 0, &text));
         render.draw(&hello);

@@ -51,14 +51,20 @@ impl RectRender {
         RectRender { vao, vbo }
     }
 
-    pub fn draw(&self, rect: Rect<f32>, st: Option<Rect<f32>>) {
+    pub fn draw(&self, rect: Rect<f32>, st: Option<Rect<f32>>, flip_v: bool) {
         let st = st.unwrap_or(Rect::new((0.0, 0.0), (1.0, 1.0)));
 
+        let (top, bot) = if flip_v {
+            (st.bot(), st.top())
+        } else {
+            (st.top(), st.bot())
+        };
+
         let points: [glm::Vec4; 4] = [
-            glm::vec4(rect.left(), rect.top(), st.left(), st.bot()),
-            glm::vec4(rect.left(), rect.bot(), st.left(), st.top()),
-            glm::vec4(rect.right(), rect.bot(), st.right(), st.top()),
-            glm::vec4(rect.right(), rect.top(), st.right(), st.bot()),
+            glm::vec4(rect.left(), rect.top(), st.left(), top),
+            glm::vec4(rect.left(), rect.bot(), st.left(), bot),
+            glm::vec4(rect.right(), rect.bot(), st.right(), bot),
+            glm::vec4(rect.right(), rect.top(), st.right(), top),
         ];
 
         unsafe {

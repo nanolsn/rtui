@@ -18,6 +18,7 @@ impl Viewport {
         viewport
     }
 
+    #[allow(dead_code)]
     pub fn size(&self) -> Vec2d<i32> { self.size }
 
     pub fn resize<S>(&mut self, size: S)

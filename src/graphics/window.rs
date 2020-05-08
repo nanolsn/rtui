@@ -14,7 +14,7 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn new<S>(title: S, (w, h): (u32, u32)) -> Self
+    pub fn new<S>(title: S, (w, h): (u32, u32), pixel_size: i32) -> Self
         where
             S: Into<String>,
     {
@@ -36,7 +36,7 @@ impl Window {
             context.make_current().unwrap()
         };
 
-        let render = Render::new(&context).unwrap();
+        let render = Render::new(&context, pixel_size).unwrap();
 
         Window {
             context,
