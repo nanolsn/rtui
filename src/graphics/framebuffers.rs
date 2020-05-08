@@ -211,6 +211,8 @@ impl FramebufferSet {
 
         Ok(())
     }
+
+    pub fn size(&self) -> Vec2d<i32> { self.active().size }
 }
 
 impl Drop for FramebufferSet {

@@ -51,14 +51,17 @@ impl Font {
         let atlas_size = atlas_size.into();
 
         let (width, height) = pages.first().size().into_inner();
-        let glyph_width = width / atlas_size.x;
-        let glyph_height = height / atlas_size.y;
+        let glyph_width = width / atlas_size.width();
+        let glyph_height = height / atlas_size.height();
 
         Font {
             atlas_size,
-            glyphs_on_page: atlas_size.x * atlas_size.y,
+            glyphs_on_page: atlas_size.width() * atlas_size.height(),
             glyph_size_default: Vec2d::new(glyph_width, glyph_height),
-            glyphs_st_default: Vec2d::new(1.0 / atlas_size.x as f32, 1.0 / atlas_size.y as f32),
+            glyphs_st_default: Vec2d::new(
+                1.0 / atlas_size.width() as f32,
+                1.0 / atlas_size.height() as f32,
+            ),
             indent,
             line_spacing,
             pages,

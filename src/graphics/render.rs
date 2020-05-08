@@ -10,6 +10,7 @@ use super::{
     texture::{Texture, Format as TextureFormat},
     renderbuffer::Format as RenderbufferFormat,
     uniforms::UniformError,
+    viewport::Viewport,
 };
 
 #[derive(Debug)]
@@ -33,6 +34,7 @@ impl From<FramebufferError> for RenderError {
 
 #[derive(Debug)]
 pub struct Render {
+    viewport: Viewport,
     shaders: ShaderSet,
     framebuffers: FramebufferSet,
     size: Vec2d<i32>,
@@ -69,6 +71,7 @@ impl Render {
         framebuffers.add_renderbuffer(RenderbufferFormat::Depth24)?;
 
         Ok(Render {
+            viewport: Viewport::new((w, h)),
             shaders,
             framebuffers,
             size: (w, h).into(),
@@ -126,8 +129,8 @@ impl Render {
     #[allow(dead_code)]
     pub fn size(&self) -> Vec2d<i32> { self.size }
 
-    pub fn resize(&mut self, size: Vec2d<i32>) {
-        unsafe { gl::Viewport(0, 0, size.x, size.y) }
+    pub(super) fn resize(&mut self, size: Vec2d<i32>) {
+        self.viewport.resize(size);
 
         let projection = Render::make_ortho(size.cast::<f32>());
         self.shader_data.projection.set_value(projection);

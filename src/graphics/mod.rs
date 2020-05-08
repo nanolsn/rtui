@@ -15,6 +15,7 @@ mod shader_data;
 mod shaders;
 mod texture;
 mod uniforms;
+mod viewport;
 mod window;
 
 pub use draw::{Draw, DrawParameters};
