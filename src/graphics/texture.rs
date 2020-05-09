@@ -39,6 +39,7 @@ pub enum TextureError {
     ImageError(ImageError),
     NegativeSize,
     WrongRawSize,
+    UnsupportedFormat,
 }
 
 impl From<ImageError> for TextureError {
@@ -74,7 +75,7 @@ impl Texture {
             DynamicImage::ImageLumaA8(data) => (Format::RG, data.as_ref()),
             DynamicImage::ImageRgb8(data) => (Format::RGB, data.as_ref()),
             DynamicImage::ImageRgba8(data) => (Format::RGBA, data.as_ref()),
-            _ => panic!("Unsupported format!"),
+            _ => return Err(TextureError::UnsupportedFormat),
         };
 
         let (width, height) = img.dimensions();
@@ -96,13 +97,12 @@ impl Texture {
             }
         }
 
-        let ptr = raw
-            .map(|r| r.as_ptr())
-            .unwrap_or(std::ptr::null());
+        let id = unsafe {
+            let ptr = raw
+                .map(|r| r.as_ptr())
+                .unwrap_or(std::ptr::null());
 
-        let mut id = 0;
-
-        unsafe {
+            let mut id = 0;
             gl::GenTextures(1, &mut id);
             gl::BindTexture(gl::TEXTURE_2D, id);
 
@@ -119,7 +119,9 @@ impl Texture {
             );
 
             Texture::set_parameters();
-        }
+
+            id
+        };
 
         Ok(Texture { id, width, height, format })
     }

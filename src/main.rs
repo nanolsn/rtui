@@ -9,7 +9,7 @@ use ui::*;
 fn main() {
     let window = Window::new("App", (600, 400), 2);
 
-    let rect = Col::red(Rect::new((31, 31), (2, 2)));
+    let rect = Col::red(Rect::new((31, 31), (12, 12)));
     let dot = Rect::new((30, 30), (1, 1));
     let img = Pos::right_bot(4, 4, Image::new("./data/1.png", window.render()));
     let u = Pos::left(4, Image::new("./data/u.png", window.render()));

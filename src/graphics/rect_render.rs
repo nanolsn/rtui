@@ -67,6 +67,10 @@ impl RectRender {
             glm::vec4(rect.right(), rect.top(), st.right(), top),
         ];
 
+        self.draw_points(&points);
+    }
+
+    fn draw_points(&self, points: &[glm::Vec4; 4]) {
         unsafe {
             gl::BindVertexArray(self.vao);
             gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo);
@@ -78,11 +82,7 @@ impl RectRender {
                 points.as_ptr() as *const std::ffi::c_void,
             );
 
-            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
-
             gl::DrawArrays(gl::TRIANGLE_FAN, 0, points.len() as i32);
-
-            gl::BindVertexArray(0);
         }
     }
 }
