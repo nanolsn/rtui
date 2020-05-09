@@ -7,13 +7,13 @@ use crate::{
         Render,
         Draw,
         DrawParameters,
-        FontParameters,
+        FontStyle,
     },
 };
 
 #[derive(Debug)]
 pub struct Font<U> {
-    font: FontParameters,
+    style: FontStyle,
     ui: U,
 }
 
@@ -22,16 +22,16 @@ impl<U> Font<U>
         U: Draw,
 {
     pub fn new(ui: U) -> Self {
-        Font::from_style(ui, FontParameters {
+        Font::from_style(ui, FontStyle {
             monospaced: false,
             shadow: None,
         })
     }
 
-    pub fn from_style(ui: U, font: FontParameters) -> Self { Font { ui, font } }
+    pub fn from_style(ui: U, font: FontStyle) -> Self { Font { ui, style: font } }
 
     pub fn monospaced(mut self) -> Self {
-        self.font = self.font.monospaced();
+        self.style = self.style.monospaced();
         self
     }
 
@@ -39,7 +39,7 @@ impl<U> Font<U>
         where
             V: Into<Vec2d<i32>>,
     {
-        self.font = self.font.shadow(delta, color);
+        self.style = self.style.shadow(delta, color);
         self
     }
 }
@@ -49,7 +49,7 @@ impl<U> Draw for Font<U>
         U: Draw,
 {
     fn draw(&self, render: &mut Render, mut params: DrawParameters) {
-        params.font = self.font;
+        params.font_style = self.style;
         self.ui.draw(render, params);
     }
 }

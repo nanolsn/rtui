@@ -15,14 +15,14 @@ pub struct FontShadow {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct FontParameters {
+pub struct FontStyle {
     pub monospaced: bool,
     pub shadow: Option<FontShadow>,
 }
 
-impl FontParameters {
+impl FontStyle {
     pub fn new() -> Self {
-        FontParameters {
+        FontStyle {
             monospaced: false,
             shadow: None,
         }
@@ -44,8 +44,8 @@ impl FontParameters {
     }
 }
 
-impl Default for FontParameters {
-    fn default() -> Self { FontParameters::new() }
+impl Default for FontStyle {
+    fn default() -> Self { FontStyle::new() }
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -53,7 +53,7 @@ pub struct DrawParameters {
     pub color: Color,
     pub position: Position,
     pub frame: Rect<i32>,
-    pub font: FontParameters,
+    pub font_style: FontStyle,
 }
 
 impl DrawParameters {
