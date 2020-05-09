@@ -2,6 +2,7 @@
 mod macros;
 
 mod accept;
+mod debug;
 mod draw;
 mod font;
 mod font_render;

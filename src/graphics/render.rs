@@ -173,6 +173,8 @@ impl Render {
             None,
             false,
         );
+
+        super::debug::unwrap_error();
     }
 
     pub fn clear(&self, color: Color) {
