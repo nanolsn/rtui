@@ -15,12 +15,21 @@ pub enum Format {
 }
 
 impl Format {
-    pub fn gl_format(&self) -> u32 {
+    pub fn format(&self) -> u32 {
         match self {
             Format::R => gl::RED,
             Format::RG => gl::RG,
             Format::RGB => gl::RGB,
             Format::RGBA => gl::RGBA,
+        }
+    }
+
+    pub fn color_size_in_bytes(&self) -> usize {
+        match self {
+            Format::R => 1,
+            Format::RG => 2,
+            Format::RGB => 3,
+            Format::RGBA => 4,
         }
     }
 }
@@ -29,6 +38,7 @@ impl Format {
 pub enum TextureError {
     ImageError(ImageError),
     NegativeSize,
+    WrongRawSize,
 }
 
 impl From<ImageError> for TextureError {
@@ -59,7 +69,7 @@ impl Texture {
     }
 
     pub fn from_image(img: DynamicImage) -> Result<Self, TextureError> {
-        let size = Vec2d::new(img.width() as i32, img.height() as i32);
+        let (width, height) = img.dimensions();
 
         let (format, raw) = match img {
             DynamicImage::ImageLuma8(a) => (Format::R, a.into_raw()),
@@ -69,7 +79,7 @@ impl Texture {
             _ => panic!("Unsupported format!"),
         };
 
-        Texture::from_raw(Some(raw), format, size)
+        Texture::from_raw(Some(raw), format, (width as i32, height as i32).into())
     }
 
     fn from_raw(raw: Option<Vec<u8>>, format: Format, size: Vec2d<i32>)
@@ -81,7 +91,14 @@ impl Texture {
             return Err(TextureError::NegativeSize);
         }
 
+        if let Some(raw) = &raw {
+            if raw.len() != (width * height) as usize * format.color_size_in_bytes() {
+                return Err(TextureError::WrongRawSize);
+            }
+        }
+
         let ptr: *const u8 = raw
+            .as_ref()
             .map(|r| r.as_ptr())
             .unwrap_or(std::ptr::null());
 
@@ -94,11 +111,11 @@ impl Texture {
             gl::TexImage2D(
                 gl::TEXTURE_2D,
                 0,
-                format.gl_format() as i32,
+                format.format() as i32,
                 width,
                 height,
                 0,
-                format.gl_format(),
+                format.format(),
                 gl::UNSIGNED_BYTE,
                 ptr as *const std::ffi::c_void,
             );
