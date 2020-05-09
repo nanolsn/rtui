@@ -8,10 +8,52 @@ use super::{
     Render,
 };
 
+#[derive(Copy, Clone, Debug)]
+pub struct FontShadow {
+    pub delta: Vec2d<i32>,
+    pub color: Color,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub struct FontParameters {
+    pub monospaced: bool,
+    pub shadow: Option<FontShadow>,
+}
+
+impl FontParameters {
+    pub fn new() -> Self {
+        FontParameters {
+            monospaced: false,
+            shadow: None,
+        }
+    }
+
+    pub fn monospaced(mut self) -> Self {
+        self.monospaced = true;
+        self
+    }
+
+    pub fn shadow<V>(mut self, delta: V, color: Color) -> Self
+        where
+            V: Into<Vec2d<i32>>,
+    {
+        let delta = delta.into();
+
+        self.shadow = Some(FontShadow { delta, color });
+        self
+    }
+}
+
+impl Default for FontParameters {
+    fn default() -> Self { FontParameters::new() }
+}
+
+#[derive(Copy, Clone, Debug)]
 pub struct DrawParameters {
     pub color: Color,
     pub position: Position,
     pub frame: Rect<i32>,
+    pub font: FontParameters,
 }
 
 impl DrawParameters {

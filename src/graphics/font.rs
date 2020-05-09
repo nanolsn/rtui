@@ -69,15 +69,20 @@ impl Font {
         }
     }
 
-    pub fn glyphs(&self, text: &str, mut buf: Vec<Glyph>) -> Glyphs {
+    pub fn glyphs(&self, text: &str, mut buf: Vec<Glyph>, monospaced: bool) -> Glyphs {
         let mut delta_x = 0.0;
         let indent = self.indent as f32;
+        let default = GlyphSize::new(0, self.glyph_size_default.width());
 
         for ch in text.chars() {
-            let size = self.glyph_widths
-                .get(&ch)
-                .cloned()
-                .unwrap_or(GlyphSize::new(0, self.glyph_size_default.width()));
+            let size = if monospaced {
+                default
+            } else {
+                self.glyph_widths
+                    .get(&ch)
+                    .cloned()
+                    .unwrap_or(default)
+            };
 
             buf.push(Glyph::new(size, delta_x, ch as u32));
 

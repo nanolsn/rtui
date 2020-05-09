@@ -2,6 +2,7 @@ use super::{
     super::common::*,
     Draw,
     DrawParameters,
+    FontParameters,
     font_render::FontRender,
     framebuffers::{FramebufferSet, FramebufferError},
     rect_render::RectRender,
@@ -222,6 +223,10 @@ impl Render {
             color: Color::white(),
             position: Position::default(),
             frame: self.size.into_rect(),
+            font: FontParameters {
+                monospaced: false,
+                shadow: None,
+            },
         })
     }
 
@@ -239,10 +244,17 @@ impl Render {
     pub fn print(&mut self, text: &str, params: &DrawParameters) {
         let mut font = self.font_render.take().unwrap();
 
-        let glyphs = font.glyphs(text);
-        let pos = params.render_rect(glyphs.size()).pos();
+        let glyphs = font.glyphs(text, params.font.monospaced);
+        let pos = params.render_rect(glyphs.size()).pos().cast::<f32>();
 
-        font.print(self, glyphs.into_inner(), pos.cast());
+        if let Some(shadow) = &params.font.shadow {
+            self.set_color(shadow.color);
+            font.print(self, &*glyphs, pos + shadow.delta.cast());
+        }
+
+        self.set_color(params.color);
+        font.print(self, &*glyphs, pos);
+        font.print_end(glyphs.into_inner());
 
         self.font_render = Some(font);
     }

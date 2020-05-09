@@ -27,3 +27,9 @@ impl Glyphs {
 
     pub fn into_inner(self) -> Vec<Glyph> { self.glyphs }
 }
+
+impl std::ops::Deref for Glyphs {
+    type Target = [Glyph];
+
+    fn deref(&self) -> &Self::Target { self.glyphs.as_slice() }
+}

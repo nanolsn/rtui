@@ -19,7 +19,7 @@ mod uniforms;
 mod viewport;
 mod window;
 
-pub use draw::{Draw, DrawParameters};
+pub use draw::*;
 pub use render::Render;
 pub use texture::{Texture, TextureError};
 pub use window::Window;
