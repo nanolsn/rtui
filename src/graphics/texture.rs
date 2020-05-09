@@ -65,24 +65,23 @@ impl Texture {
             S: AsRef<str>,
     {
         let img = im::open(file.as_ref())?;
-        Texture::from_image(img)
+        Texture::from_image(&img)
     }
 
-    pub fn from_image(img: DynamicImage) -> Result<Self, TextureError> {
-        let (width, height) = img.dimensions();
-
+    pub fn from_image(img: &DynamicImage) -> Result<Self, TextureError> {
         let (format, raw) = match img {
-            DynamicImage::ImageLuma8(a) => (Format::R, a.into_raw()),
-            DynamicImage::ImageLumaA8(a) => (Format::RG, a.into_raw()),
-            DynamicImage::ImageRgb8(a) => (Format::RGB, a.into_raw()),
-            DynamicImage::ImageRgba8(a) => (Format::RGBA, a.into_raw()),
+            DynamicImage::ImageLuma8(data) => (Format::R, data.as_ref()),
+            DynamicImage::ImageLumaA8(data) => (Format::RG, data.as_ref()),
+            DynamicImage::ImageRgb8(data) => (Format::RGB, data.as_ref()),
+            DynamicImage::ImageRgba8(data) => (Format::RGBA, data.as_ref()),
             _ => panic!("Unsupported format!"),
         };
 
+        let (width, height) = img.dimensions();
         Texture::from_raw(Some(raw), format, (width as i32, height as i32).into())
     }
 
-    fn from_raw(raw: Option<Vec<u8>>, format: Format, size: Vec2d<i32>)
+    fn from_raw(raw: Option<&[u8]>, format: Format, size: Vec2d<i32>)
                 -> Result<Self, TextureError> {
         let width = size.width();
         let height = size.height();
@@ -91,14 +90,13 @@ impl Texture {
             return Err(TextureError::NegativeSize);
         }
 
-        if let Some(raw) = &raw {
+        if let Some(raw) = raw {
             if raw.len() != (width * height) as usize * format.color_size_in_bytes() {
                 return Err(TextureError::WrongRawSize);
             }
         }
 
-        let ptr: *const u8 = raw
-            .as_ref()
+        let ptr = raw
             .map(|r| r.as_ptr())
             .unwrap_or(std::ptr::null());
 
