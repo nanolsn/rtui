@@ -7,8 +7,8 @@ use graphics::{Window, FontStyle};
 use ui::*;
 
 fn main() {
-    let mut window = Window::new("App", (600, 400), 2);
-    window.with_bg(Color::rgb(0.15, 0.01, 0.06));
+    let window = Window::new("App", (600, 400), 2)
+        .with_bg(Color::rgb(0.15, 0.01, 0.06));
 
     let rect = Col::red(Rect::new((31, 31), (12, 12)));
     let img = Pos::right_bot(4, 4, Image::new("./data/1.png", window.render()));

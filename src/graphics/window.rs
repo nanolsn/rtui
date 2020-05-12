@@ -48,8 +48,7 @@ impl Window {
 
     pub fn render(&self) -> &Render { &self.render }
 
-    #[allow(dead_code)]
-    pub fn with_bg(&mut self, color: Color) -> &mut Self {
+    pub fn with_bg(mut self, color: Color) -> Self {
         self.bg = color;
         self
     }
