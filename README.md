@@ -1,5 +1,5 @@
 # RTUI
-UI implementation for RT engine. Based on the OpenGL.
+UI implementation for RT engine. Based on the OpenGL (temporary, I hope).
 
 ## Example
 ```rust
