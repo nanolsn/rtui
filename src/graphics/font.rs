@@ -90,7 +90,7 @@ impl Font {
         }
 
         Glyphs::new(buf, Vec2d::new(
-            (delta_x - indent) as i32,
+            0.max((delta_x - indent) as i32),
             self.glyph_size_default.height(),
         ))
     }

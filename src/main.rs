@@ -18,7 +18,7 @@ fn main() {
     let cyr = Font::from_style(Col::red("`ж`эьмъйы ЭЬМЪЙЫ"), style);
     let cyr = Pos::right(0, cyr);
 
-    let hello = Font::new("Hello, world!")
+    let hello = Font::new("Hello,\nworld!")
         .monospaced()
         .shadow((1, -1), Color::rgb(0.6, 0.0, 0.7));
 
