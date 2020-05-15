@@ -12,17 +12,12 @@ use super::{
 
 #[derive(Copy, Clone, Debug)]
 pub struct GlyphSize {
-    pub left_offset: f32,
-    pub width: f32,
+    pub left_offset: i32,
+    pub width: i32,
 }
 
 impl GlyphSize {
-    pub fn new(left_offset: i32, width: i32) -> Self {
-        GlyphSize {
-            left_offset: left_offset as f32,
-            width: width as f32,
-        }
-    }
+    pub fn new(left_offset: i32, width: i32) -> Self { GlyphSize { left_offset, width } }
 }
 
 #[derive(Debug)]
@@ -70,8 +65,8 @@ impl Font {
     }
 
     pub fn glyphs(&self, text: &str, mut buf: Vec<Glyph>, monospaced: bool) -> Glyphs {
-        let mut delta_x = 0.0;
-        let indent = self.indent as f32;
+        let mut delta_x = 0;
+        let indent = self.indent;
         let default = GlyphSize::new(0, self.glyph_size_default.width());
 
         for ch in text.chars() {
@@ -90,15 +85,15 @@ impl Font {
         }
 
         Glyphs::new(buf, Vec2d::new(
-            0.max((delta_x - indent) as i32),
+            0.max(delta_x - indent),
             self.glyph_size_default.height(),
         ))
     }
 
     fn placing(&self, glyph: Glyph, pos: Vec2d<f32>) -> Rect<f32> {
         Rect::new(
-            (pos.x + glyph.delta_x, pos.y),
-            (glyph.size.width, self.glyph_size_default.height() as f32),
+            (pos.x + glyph.delta_x as f32, pos.y),
+            (glyph.size.width as f32, self.glyph_size_default.height() as f32),
         )
     }
 
@@ -107,14 +102,14 @@ impl Font {
         let default_width = self.glyph_size_default.width() as f32;
         let atlas_width = self.atlas_size.width();
 
-        let left_offset = glyph.size.left_offset / default_width;
+        let left_offset = glyph.size.left_offset as f32 / default_width;
 
         let s = ((code_at_page % atlas_width) as f32 + left_offset)
             * self.glyphs_st_default.width();
         let t = (code_at_page / atlas_width) as f32 * self.glyphs_st_default.height();
 
         Rect::new((s, t), (
-            (glyph.size.width / default_width) * self.glyphs_st_default.width(),
+            (glyph.size.width as f32 / default_width) * self.glyphs_st_default.width(),
             self.glyphs_st_default.height(),
         ))
     }
