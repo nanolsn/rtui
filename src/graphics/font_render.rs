@@ -20,7 +20,7 @@ impl FontRender {
 
     pub fn print(&self, render: &mut Render, chars: &[Char], rect: Rect<i32>) {
         let mut pos = rect.pos();
-        pos.y += rect.height - self.font.glyph_size_default().height();
+        pos.y += rect.height - self.font.default_size().height();
 
         for ch in chars {
             match ch {
@@ -30,11 +30,12 @@ impl FontRender {
                         Some(texture) => render.set_texture(texture),
                     }
 
-                    let (placing, st_map) = self.font.render_rect(*glyph, pos);
-                    render.draw_rect_accept(UsedShader::Font, placing.cast(), Some(st_map), true);
+                    let placing = self.font.placing(*glyph, pos).cast();
+                    let st_map = self.font.st_map(*glyph);
+                    render.draw_rect_accept(UsedShader::Font, placing, Some(st_map), true);
                 }
                 Char::NewLine => {
-                    self.font.new_line(&mut pos);
+                    pos.y -= self.font.new_line_height();
                 }
             }
         }
