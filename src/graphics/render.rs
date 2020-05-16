@@ -242,15 +242,15 @@ impl Render {
         let mut font = self.font_render.take().unwrap();
 
         let glyphs = font.glyphs(text, params.font_style.monospaced);
-        let pos = params.render_rect(glyphs.size()).pos().cast::<f32>();
+        let rect = params.render_rect(glyphs.size());
 
         if let Some(shadow) = &params.font_style.shadow {
             self.set_color(shadow.color);
-            font.print(self, &*glyphs, pos + shadow.delta.cast());
+            font.print(self, &*glyphs, rect.translated(shadow.delta));
         }
 
         self.set_color(params.color);
-        font.print(self, &*glyphs, pos);
+        font.print(self, &*glyphs, rect);
         font.print_end(glyphs.into_inner());
 
         self.font_render = Some(font);

@@ -64,36 +64,42 @@ impl Font {
         }
     }
 
-    pub fn glyphs(&self, text: &str, mut buf: Vec<Glyph>, monospaced: bool) -> Glyphs {
-        let mut delta_x = 0;
-        let indent = self.indent;
+    pub fn glyphs(&self, text: &str, mut buf: Vec<Char>, monospaced: bool) -> Glyphs {
         let default = GlyphSize::new(0, self.glyph_size_default.width());
+        let mut width = 0;
+        let mut size = Vec2d::new(0, self.glyph_size_default.height());
 
         for ch in text.chars() {
-            let size = if monospaced {
-                default
+            if ch == '\n' {
+                buf.push(Char::NewLine);
+
+                size.x = width.max(size.x);
+                width = 0;
+                size.y += self.line_spacing + self.glyph_size_default.height();
             } else {
-                self.glyph_widths
-                    .get(&ch)
-                    .cloned()
-                    .unwrap_or(default)
-            };
+                let glyph_size = if monospaced {
+                    default
+                } else {
+                    self.glyph_widths
+                        .get(&ch)
+                        .cloned()
+                        .unwrap_or(default)
+                };
 
-            buf.push(Glyph::new(size, delta_x, ch as u32));
+                buf.push(Char::Print(Glyph::new(glyph_size, width, ch as u32)));
 
-            delta_x += size.width + indent;
+                width += glyph_size.width + self.indent;
+                size.x = width.max(size.x);
+            }
         }
 
-        Glyphs::new(buf, Vec2d::new(
-            0.max(delta_x - indent),
-            self.glyph_size_default.height(),
-        ))
+        Glyphs::new(buf, size)
     }
 
-    fn placing(&self, glyph: Glyph, pos: Vec2d<f32>) -> Rect<f32> {
+    fn placing(&self, glyph: Glyph, pos: Vec2d<i32>) -> Rect<i32> {
         Rect::new(
-            (pos.x + glyph.delta_x as f32, pos.y),
-            (glyph.size.width as f32, self.glyph_size_default.height() as f32),
+            (pos.x + glyph.delta_x, pos.y),
+            (glyph.size.width, self.glyph_size_default.height()),
         )
     }
 
@@ -114,7 +120,7 @@ impl Font {
         ))
     }
 
-    pub fn render_rect(&self, glyph: Glyph, pos: Vec2d<f32>) -> (Rect<f32>, Rect<f32>) {
+    pub fn render_rect(&self, glyph: Glyph, pos: Vec2d<i32>) -> (Rect<i32>, Rect<f32>) {
         (self.placing(glyph, pos), self.st_map(glyph))
     }
 
@@ -122,6 +128,12 @@ impl Font {
         let page_code = code as i32 / self.glyphs_on_page;
         self.pages.get(page_code as usize)
     }
+
+    pub fn new_line(&self, pos: &mut Vec2d<i32>) {
+        pos.y -= self.line_spacing + self.glyph_size_default.height();
+    }
+
+    pub fn glyph_size_default(&self) -> Vec2d<i32> { self.glyph_size_default }
 }
 
 impl Default for Font {

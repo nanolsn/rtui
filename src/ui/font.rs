@@ -30,6 +30,7 @@ impl<U> Font<U>
 
     pub fn from_style(ui: U, font: FontStyle) -> Self { Font { ui, style: font } }
 
+    #[allow(dead_code)]
     pub fn monospaced(mut self) -> Self {
         self.style = self.style.monospaced();
         self

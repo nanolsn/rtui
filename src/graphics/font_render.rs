@@ -1,5 +1,5 @@
 use super::{
-    super::common::Vec2d,
+    super::common::Rect,
     font::Font,
     glyphs::*,
     Render,
@@ -9,24 +9,34 @@ use super::{
 #[derive(Debug)]
 pub struct FontRender {
     font: Font,
-    buf: Option<Vec<Glyph>>,
+    buf: Option<Vec<Char>>,
 }
 
 impl FontRender {
     pub fn new() -> Self {
         let font = Font::default();
-        FontRender { font, buf: Some(Vec::new()) }
+        FontRender { font, buf: Some(vec![]) }
     }
 
-    pub fn print(&self, render: &mut Render, glyphs: &[Glyph], pos: Vec2d<f32>) {
-        for glyph in glyphs {
-            match self.font.page(glyph.code) {
-                None => continue,
-                Some(texture) => render.set_texture(texture),
-            }
+    pub fn print(&self, render: &mut Render, chars: &[Char], rect: Rect<i32>) {
+        let mut pos = rect.pos();
+        pos.y += rect.height - self.font.glyph_size_default().height();
 
-            let (placing, st_map) = self.font.render_rect(*glyph, pos);
-            render.draw_rect_accept(UsedShader::Font, placing, Some(st_map), true);
+        for ch in chars {
+            match ch {
+                Char::Print(glyph) => {
+                    match self.font.page(glyph.code) {
+                        None => continue,
+                        Some(texture) => render.set_texture(texture),
+                    }
+
+                    let (placing, st_map) = self.font.render_rect(*glyph, pos);
+                    render.draw_rect_accept(UsedShader::Font, placing.cast(), Some(st_map), true);
+                }
+                Char::NewLine => {
+                    self.font.new_line(&mut pos);
+                }
+            }
         }
     }
 
@@ -34,8 +44,8 @@ impl FontRender {
         self.font.glyphs(text, self.buf.take().unwrap(), monospaced)
     }
 
-    pub fn print_end(&mut self, mut glyphs: Vec<Glyph>) {
-        glyphs.clear();
-        self.buf = Some(glyphs);
+    pub fn print_end(&mut self, mut buf: Vec<Char>) {
+        buf.clear();
+        self.buf = Some(buf);
     }
 }

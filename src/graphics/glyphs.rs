@@ -15,21 +15,27 @@ impl Glyph {
 }
 
 #[derive(Debug)]
+pub enum Char {
+    Print(Glyph),
+    NewLine,
+}
+
+#[derive(Debug)]
 pub struct Glyphs {
-    glyphs: Vec<Glyph>,
+    glyphs: Vec<Char>,
     size: Vec2d<i32>,
 }
 
 impl Glyphs {
-    pub fn new(glyphs: Vec<Glyph>, size: Vec2d<i32>) -> Self { Glyphs { glyphs, size } }
+    pub fn new(glyphs: Vec<Char>, size: Vec2d<i32>) -> Self { Glyphs { glyphs, size } }
 
     pub fn size(&self) -> Vec2d<i32> { self.size }
 
-    pub fn into_inner(self) -> Vec<Glyph> { self.glyphs }
+    pub fn into_inner(self) -> Vec<Char> { self.glyphs }
 }
 
 impl std::ops::Deref for Glyphs {
-    type Target = [Glyph];
+    type Target = [Char];
 
     fn deref(&self) -> &Self::Target { self.glyphs.as_slice() }
 }
